@@ -167,8 +167,28 @@ $D_{masi}\left ( X,Y \right )=1- \frac{2*\sum x_{i}\cap y_{i} }{max(\sum x_{j}\c
 ### Métricas basadas en similitudes de edición
 
 Estas métricas en general se basan en comparar palabras mediante el número de trasnformaciones que hay que realizar para llegar de una a otra.
+Se suelen utilizar para comparar distancias linguisticas entre diferentes idiomas, duplicación de textos y correción de léxico. Las más utlizadas son:
 
-Continuara
+-Distancia de **Hamming**.
+
+Compara cada letra de dos palabras basadas por su posición, su ventaja es su velocidad y simplicidad, por el contrario, es muy estricto, ya que necesita que ambas palabras sean del mismo tamaño.
+
+-Distancia de **Levenshtein**.
+
+Compara el número de transformaciones necesarias para transformar una palabra en otra, estas transformaciones se resumen en:
+    
+    -Insertar caracteres.
+    -Eliminar caracteres.
+    -Sustituir un caracter por otro.
+    
+Esta distancia en general es más completa y compleja que la distancia de Hamming.
+
+### Métricas basadas en las secuencias de palabras
+
+Compara las diferencias entre dos palabras, teniendo en cuenta las sub-palabras o sub-cadenas de palabras más largas dentro de las palabras inciales. (Longest common subsequence and longest common substring)
+
+La diferencia básica entre las sub-palabras y sub-cadenas de palabras, reside en que el primero utiliza letras dentro de la palabra sin necesidad de que sean contiguas, y el segundo si implica que esté una contigua a la otra.
+Por ejemplo entre las palabras 'palabras' y 'paralelas', con el método de sub-palabras tendrían en común : 'palas', mientras que con el método de sub-cadenas sería: 'pala' y 'para'.
 
 ## Evaluación de los resultados
 
