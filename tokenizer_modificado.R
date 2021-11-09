@@ -54,6 +54,34 @@ compara <- function(original, sospechoso){
   return(salida)
 }
 
+compara_djabbard <- function(original, sospechoso){
+  
+  coinc <- c()
+  coinc2 <- c()
+  
+  or <- tibble(trigram = unlist(original))
+  sus <- tibble(trigram = unlist(unlist(sospechoso)))
+  
+  sus <- separate(sus,trigram,c("P1","P2","P3"),sep=" ")
+  or <- separate(or,trigram,c("P1","P2","P3"),sep=" ")
+  
+  for( i in 1:length(sus$P1)){#aquí es donde hay que poner un modelo de verdad, una distancia o métrica
+    count <- 0;
+    count2 <- 0
+    sus_str <- c(sus[i,]$P1,sus[i,]$P2,sus[i,]$P3)
+    
+    for( j in 1:length(or$P1)){
+      or_str <- c(or[j,]$P1,or[j,]$P2,or[j,]$P3)
+      count <- count + sum(or_str == sus_str)
+      count2 <- count2 + length(unique(c(or_str,sus_str)))
+    }
+    
+    d_jabbard <- 1-count/count2
+    salida <- c(d_jabbard,seq(1,20,1))
+  }
+  return(salida)
+}
+
 #### Limpieza de los datos ####
 load(file = "corpus_as_dataframe.Rda")
 Ta <- corpus[corpus$Task=="a",]
@@ -65,7 +93,7 @@ Ta$Text <- lapply(Ta$Text,FUN = agrupa)
 
 #### comparamos Ngrams ###
 Original <- unlist(Ta$Text[20])
-aux <- lapply(Ta$Text,FUN = compara,original = Original) #obtenemos lista con número de concidenca por ngrama
+aux <- lapply(Ta$Text,FUN = compara_djabbard,original = Original) #obtenemos lista con número de concidenca por ngrama
 for (i in 1:length(Ta$Text)){
   Ta$score[i] <- aux[[i]][1]
   Ta$Coincount[i] <- list(aux[[i]][2: length(aux[[i]])])
