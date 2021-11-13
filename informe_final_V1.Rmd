@@ -48,66 +48,55 @@ Un corpus lingüístico es un conjunto de textos variados que cumple la función
 
 ## Preprocesado   
 
-
 El preporcesado es el primer contacto con los datos, las primeras tareas de limpieza y formateo de los datos suelen ser por lo general sencillas y en su mayoría genéricas. 
 
 Primero exponemos las funciones básicas para este propósito:
 ```{r}
-#Carga de datos como texto plano
+#librerías para cargar los datos y preprocesarlos 
 library(readr)
 library(stringr)
 
-texto<-paste(readLines("../delfin.txt"),collapse=" ")
-#elimilar los espacios en blanco al comienzo y al final del string
-texto<-str_trim(texto)
+texto<-" ¡ Esto es    un texto de prueba para demostrar la   limpieza incicial de los textos! (ááéçñ)"
 #pasarlo a minúsculas
 texto<-tolower(texto) 
-#tolower() es de la libreria base, pero str_to_lower() 
-#función de la librería stringr es otra alternativa
 texto
+```
 
+
+```{r}
 #eliminar signos de puntuación, carácteres problemáticos
 texto<-gsub("[[:punct:]]"," ",texto)
 texto<-gsub("(\\n)|(\\t)"," ",texto)
 texto
 
-#y comprobar que no hay espacios repetidos
-
-
+#y comprobar que no hay espacios repetidos y al principio y final del string (str_trim())
 texto<-gsub("\\s+"," ",str_trim(texto))
 #la función str_squish() de la librería stringr hace exactamente 
-#lo mismo que la función anterior
-
-```
-
-En el caso de que el idioma tenga acentuación, sería recomendable eliminarla para no tener problemas de formato ni considerar diferentes palabras iguales solo por no estar acentuada o no esto lo podemos hacer de forma sencilla usando stringi::stri_trans_general()
-```{r}
-
-texto<-stringi::stri_trans_general(texto,"Latin-ASCII") # este proceso será muy dependiente del idioma del texto
+#elimilar los espacios en blanco al comienzo y al final del string
 texto
+```
 
+En el caso de que el idioma tenga acentuación, sería recomendable eliminarla para no tener problemas de formato ni considerar diferentes palabras iguales solo por estar acentuada o no. Esto lo podemos hacer de forma sencilla usando stringi::stri_trans_general()
+```{r}
+
+texto<-stringi::stri_trans_general(texto,"Latin-ASCII") 
+# este proceso será muy dependiente del idioma del texto
+texto
 ```
 
 
-Una limpieza más intensiva podría seguir con la eliminación de palabras unión `stop-words` y hasta la reducción de palabras hasta su raíz (término _stemming_ en inglés).Para este propósito hay librerías específicas en R, algunas de ellas son ??.  
-Sin embargo esta sobre-simplificación puede no ser lo más recomendado en todos los casos. Esta elección será muy dependiente del algoritmo y el tipo de plagio buscado (ya hemos comentado previamente que hay diferentes tipos de "plagio" a detectar).
+Una limpieza más intensiva podría seguir con la eliminación de palabras unión `stop-words` y hasta la reducción de palabras hasta su raíz (término _stemming_ en inglés).Para este propósito hay librerías que implementan funciones para dicho proposito en R, algunas de ellas son `tm` y `tidytext`.  
+Sin embargo esta sobre-simplificación puede no ser lo más recomendado en todos los casos. La elección será muy dependiente del algoritmo y del tipo de plagio buscado (ya hemos comentado previamente que hay diferentes tipos de plagio a detectar).
 
 ```{r}
-#eliminar stop-words tenemos varias opciones, dependiendo del paquete usado
+#eliminar stop-words con la librería tm
 #librería tm
 
 library(tm)
 
 texto2<-removeWords(texto,stopwords("es"))
-texto2<-str_trim(stripWhitespace(texto2))
+texto2<-str_squish(texto2)
 texto2
-
-#librería tidytext
-
-
-
-#libreria qdap
-
 
 
 ```
@@ -116,10 +105,8 @@ texto2
 #stemming palabras con la libreria tm
 texto2<-unlist(str_split(texto2," "))
 texto3<-stemDocument(texto2,language = "es")
-texto4<-stemCompletion(texto3,texto2)
+texto3
 ```
-
-
 
 
 ## Tokenizado
