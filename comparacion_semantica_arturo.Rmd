@@ -126,8 +126,8 @@ Ahora que ya tenemos la función que nos hace la comparación solo debemos de cr
 
 
 ```{r}
-#Hacemos un loop que recorra todos los registros que no son "original" y según su tipo de task
-#realizamos la comparación con el original de dicha clase.
+#Hacemos un loop que recorra todos los registros que no son "original" y según su tipo de
+#task realizamos la comparación con el original de dicha task
 data_no_original<-corpus[corpus$Category!="original",]
 #creamos un columna para ir llenando con las coincidencias
 data_no_original$coincidencias<-NA
