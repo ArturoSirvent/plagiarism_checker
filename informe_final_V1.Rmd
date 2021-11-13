@@ -341,6 +341,20 @@ kable(tabla_resumen)
 ```
 
 
-En la tabla podemos ver el porcentaje de plagio que se le asigna a la respuesta en función de la métrica usada. En general, vemos que todas funcionan bastante bien y nos dan un resultado acorde con la categoría, que recordemos que hace referencia al tipo de plagio que habían usado los alumnos para contestar a la pregunta. 
+En la tabla podemos ver el porcentaje de plagio que se le asigna a la respuesta en función de la métrica usada. En general, vemos que todas funcionan bastante bien y nos dan un resultado acorde con la categoría, que recordemos que hace referencia al tipo de plagio que habían usado los alumnos para contestar a la pregunta.
+
+Veamos lo bueno que es nuestro modelo para la tarea "a". Ahora vamos a suponer que tenemos solo dos categorías: PLAGIADO y NO PLAGIADO. Dentro de la categoría PLAGIADO están incluidas las categorías "cut", "light" y "heavy". Vamos a evaluar entonces los aciertos del modelo en función de las dos métricas utilizadas. Para ello, consideramos que una métrica de "containment" superior a 0.50 se considera dentro de la categoría PLAGIADO, y si obtenemos un "containment" por debajo de 0.5 consideraremos que estamos en la categoría NO PLAGIADO. 
+
+```{r}
+sum(tabla_resumen$containment < 0.5 & tabla_resumen$Category!="non")/sum(tabla_resumen$Category!="non")
+```
+
+Para la pregunta "a", se nos escapan 45.45% de los casos plagiados que los estamos clasificando como no plagiados.
+
+```{r}
+sum(tabla_resumen$containment < 0.5 & tabla_resumen$Category=="non")/sum(tabla_resumen$Category=="non")
+```
+
+Para los no plagiados, tenemos un 100% de acierto.
 
 # Bibliofragia
