@@ -201,4 +201,146 @@ Por ejemplo entre las palabras 'palabras' y 'paralelas', con el método de sub-p
 
 # Caso prático
 
+En este apartado, vamos a aplicar los procedimientos descritos a lo largo del trabajo a un caso real de detección de plagio, descrito en el apartado del Corpus.  
+
+Para el análsis, nosotros lo que tendremos será un data frame con 100 muestras,de las cuales las 95 primeras muestras son la respuesta a una de las preguntas por parte de los alumnos, y las 5 últimas muestras son los enlaces a Wikipedia que podían consultar para responder a cada una de las 5 preguntas. Algunas de las columnas de ese data frame serán el tipo de plagio con el que se pedía responder, la pregunta que se responde, el individuo que la responde y la respuesta en forma de cadena de texto.
+
+Una vez que tenemos el data frame, lo primero que hacemos es depurar la columna que contiene la respuesta tal y como se ha explicado en el apartado de preprocesado de los datos. En particular, desarrollamos una función `agrupa()` que elimina los signos de puntuación y convierte todo a minúsculas. Una vez hecho esto, dividimos cada una de las respuestas en N-gramas, en concreto hemos cogido N=3 ya que se ha visto que es la que mejor funciona.
+
+```{r,include=FALSE}
+#Miguel Hortelano 2/11/2021#
+library(tidyr)
+library(tidytext)
+library(dplyr)
+library(ngram)
+
+#### funciones ####
+# Devuelve el texto introducido en forma de lista de Ngramas 
+agrupa <-function(text){
+  temp <-unlist(text)
+  temptemp <- temp[temp != ""]
+  
+  temp2 <- temp[1]
+  for(i in 2:length(temp)){
+    temp2 <- paste(temp2,temp[i])
+  }
+  temp2 <- gsub('[[:punct:] ]+',' ',temp2)%>%
+    tolower()
+  #%>%
+  #  strsplit(split="\\s")
+  
+  temp <- tibble(word = unlist(temp2))%>%
+    unnest_tokens(trigram, word,token = "ngrams",n=3)#cambiar el número para tamaño del ngrama
+}
+```
+
+
+Una vez tenemos cada respuesta dividida en trigramas, podemos proceder a aplicar algunas de las métricas descritas en el trabajo para ver si hacen buenas predicciones. Hemos escogido las métricas de Jaccard, distancia LCS y la métrica de 'containment'. A continuación, mostramos una pequeña tabla dónde podemos ver el porcentaje de plagio que nos brinda cada una de las métricas, cuando comprobamos el nivel de plagio entre todas las respuestas de la primera pregunta (incluida la fuente de Wikipedia). Por lo tanto, tendremos una porcentaje de plagio para las 20 respuestas del data frame.
+
+
+```{r,include=FALSE}
+
+
+# Cuenta las veces que se repiten las palabras entre dos textos
+compara <- function(original, sospechoso){
+  
+  coinc <- c()
+  coinc2 <- c()
+  
+  or <- tibble(trigram = unlist(original))
+  sus <- tibble(trigram = unlist(unlist(sospechoso)))
+  
+  sus <- separate(sus,trigram,c("P1","P2","P3"),sep=" ")
+  or <- separate(or,trigram,c("P1","P2","P3"),sep=" ")
+  
+  for( i in 1:length(sus$P1)){#aquí es donde hay que poner un modelo de verdad, una distancia o métrica
+    count <- 0;
+    count2 <- 0
+    sus_str <- c(sus[i,]$P1,sus[i,]$P2,sus[i,]$P3)
+    
+    for( j in 1:length(or$P1)){
+      or_str <- c(or[j,]$P1,or[j,]$P2,or[j,]$P3)
+      count <- count + all(or_str == sus_str)
+      count2 <- count2 + sum(or_str==sus_str)
+    }
+    
+    coinc <- append(coinc,count)     #simplemente un vector con el número de veces que se ha repetido cada palabra del ngrama
+    coinc2 <- append(coinc2,count2)
+    score <- sum(coinc)/length(sus$P1)
+    salida <- c(score,coinc2)
+  }
+  return(salida)
+}
+
+compara_djabbard <- function(original, sospechoso){
+  
+  coinc <- c()
+  coinc2 <- c()
+  
+  or <- tibble(trigram = unlist(original))
+  sus <- tibble(trigram = unlist(unlist(sospechoso)))
+  
+  sus <- separate(sus,trigram,c("P1","P2","P3"),sep=" ")
+  or <- separate(or,trigram,c("P1","P2","P3"),sep=" ")
+  
+  for( i in 1:length(sus$P1)){#aquí es donde hay que poner un modelo de verdad, una distancia o métrica
+    count <- 0;
+    count2 <- 0
+    sus_str <- c(sus[i,]$P1,sus[i,]$P2,sus[i,]$P3)
+    
+    for( j in 1:length(or$P1)){
+      or_str <- c(or[j,]$P1,or[j,]$P2,or[j,]$P3)
+      count <- count + sum(or_str == sus_str)
+      count2 <- count2 + length(unique(c(or_str,sus_str)))
+    }
+    
+    d_jabbard <- 1-count/count2
+    salida <- c(d_jabbard,seq(1,20,1))
+  }
+  return(salida)
+}
+
+#### Limpieza de los datos ####
+load(file = "corpus_as_dataframe.Rda")
+Ta <- corpus[corpus$Task=="a",]
+
+
+#La columna texto ahora está en forma de ngramas
+Ta$Text <- lapply(Ta$Text,FUN = agrupa)
+
+
+#### comparamos Ngrams ###
+Original <- unlist(Ta$Text[20])
+aux <- lapply(Ta$Text,FUN = compara_djabbard,original = Original) #obtenemos lista con número de concidenca por ngrama
+aux2 <- lapply(Ta$Text,FUN = compara,original = Original)
+for (i in 1:length(Ta$Text)){
+  Ta$jabbard[i] <- aux[[i]][1]
+  Ta$Coincidencias_jabbard[i] <- list(aux[[i]][2: length(aux[[i]])])
+  Ta$containment[i] <- aux2[[i]][1]
+  Ta$Coincidencias_containment[i] <- list(aux2[[i]][2: length(aux2[[i]])])
+}
+View(Ta)
+
+# visualizamos pasando los vectores de coincidencias a matrices y haciendo heatmap
+Ta$Ccmatrix <- lapply(Ta$Coincidencias_containment, matrix, ncol = 20)
+
+sapply(Ta$Ccmatrix,heatmap)
+heatmap(Ta$Ccmatrix[[2]],Rowv=NA,Colv=NA)
+```
+
+
+
+```{r}
+#install.packages("kableExtra")
+library("kableExtra")
+
+variables <- c("Task","Category","jabbard","containment")
+tabla_resumen <- Ta[,variables]
+kable(tabla_resumen)
+
+```
+
+
+En la tabla podemos ver el porcentaje de plagio que se le asigna a la respuesta en función de la métrica usada. En general, vemos que todas funcionan bastante bien y nos dan un resultado acorde con la categoría, que recordemos que hace referencia al tipo de plagio que habían usado los alumnos para contestar a la pregunta. 
+
 # Bibliofragia
