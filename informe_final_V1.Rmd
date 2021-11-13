@@ -201,4 +201,4 @@ Por ejemplo entre las palabras 'palabras' y 'paralelas', con el método de sub-p
 
 # Caso prático
 
-#Vibliofragia
+# Bibliofragia
