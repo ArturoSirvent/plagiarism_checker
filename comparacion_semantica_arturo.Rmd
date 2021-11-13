@@ -12,9 +12,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-# Comparación semántica sin más.
+# Comparación semántica.  
 
-Tenemos que coger el data set, limpiarlo guardar todos los textos limpios y tockenizados según el tema de steeming words y luego hacemos una comparación sencilla.
+Identificación de plagio mediante una sencilla comparación semántica.  
+La estrategia será la tokenización del texto en sus raíces semánticas, para luego realizar una comparación con las raíces semánticas del texto original.  
+
+Primero tenemos que pre-procesar el data set, limpiarlo, guardar todos los textos limpios, eliminar las stop-words, y tokenizados según sus raíces, para finalmente hacer una comparación sencilla.
 
 ```{r}
 library(tidyr)
@@ -32,7 +35,7 @@ load(file = "./detector_coincidencias/corpus_as_dataframe.Rda")
 
 ```
 
-Creamos una función que deje el text completamente limpio de todo:
+Creamos una función que deje el texto completamente limpio:
 
 
 ```{r}
@@ -52,8 +55,8 @@ limpiar<-function(texto){
 ```
 
 ```{r}
+#creamos una nueva columna para guardar los textos limpios
 corpus$Text_clean<-sapply(corpus$Text,limpiar)
-
 ```
 
 
@@ -68,38 +71,38 @@ eliminar_stopwords<-function(texto,lang="en"){
 ```
 
 ```{r}
+#sobre escribimos en la columna de texto limpio, el texto sin stop-words
 corpus$Text_clean<-unname(sapply(corpus$Text_clean,eliminar_stopwords))
-#se estaba poniendo de nombre el texto con las stop-wprds y es innecesario ese uso de memoria, asi
-#que eliminamos los nombres.
+#se estaba creando un vector con nombres y no necesitamos eso, 
+#por ello applicamos el unname()
 ```
 
-Ahora que tenemos el texto sin stopwords le vamos a aplicar el steeming para quedarnos con las raices.
+Ahora que tenemos el texto sin stop-words le vamos a aplicar el stemming para quedarnos con los morfemas
 
 ```{r}
 steeming<-function(texto,lang="en",sep=" "){
   #libreria tm
-  
   #necesita las palabras separadas individualmente
   texto_aux<-unlist(strsplit(texto,sep))
   texto_aux<-stemDocument(texto_aux,language = lang)
   return(as.character(unlist(texto_aux)))
 }
-
 ```
 
 
 ```{r}
+#applicamos el stemming a cada texto limpio y obtenemos un vector de morfemas
 corpus$Text_clean<-unname(sapply(corpus$Text_clean,steeming))
 
 ```
 
 
-Ya tenemos todas las palabras en raices y tenemos todas las coincidencias. 
+Ya tenemos todas las palabras en sus raíces. El siguiente paso será contar todas las coincidencias. 
 
 
 _Nota: Un problema con el que nos podríamos encontrar y que requeriría un estudio más profundo, es el tratar con los errores de ortografía. De esta manera, un plagio parcial podría pasar desapercibido por errores de escritura. La sencilla solución que proponemos es usar la función `tm_map()` de la librería `tm` para realizar una sustitución de errores comunes (usando `replaceSynonyms`)._
 
-Por último quedaría realizar una comprobación de las coincidencias que encontramos entre los textos de prueba y los originales.
+Tal como hemos mencionado quedaría realizar una comprobación de las coincidencias que encontramos entre los textos con supuesto plagio y los originales.  
 
 Hacemos una función para comparar dos vectores de palabras. Esto será usado para comparar el texto supuestamente plagiado con el original.
 
@@ -119,27 +122,20 @@ comparar<- function(original,plagio){
 }
 ```
 
-```{r}
-comparar(corpus$Text_clean[96],corpus$Text_clean[5])
-```
-
-
-Ahora ya tenemos la función que nos hace la comparación solo debemos de crear una columna en el dataset con las coincidencias que encontremos con el original:
+Ahora que ya tenemos la función que nos hace la comparación solo debemos de crear una columna en el dataset con las coincidencias que encontremos con el original:
 
 
 ```{r}
-#para que funcione bien, vamos a 
-task_list<-unique(corpus$Task)
-
-#hacemos un loop que recorra todos los registros que no son original y según su tipo de task,
-#hacemos la comparación con el original de dicha clase.
+#Hacemos un loop que recorra todos los registros que no son "original" y según su tipo de task
+#realizamos la comparación con el original de dicha clase.
 data_no_original<-corpus[corpus$Category!="original",]
 #creamos un columna para ir llenando con las coincidencias
 data_no_original$coincidencias<-NA
 
 for (i in 1:nrow(data_no_original)){
   aux_task<-as.character(data_no_original$Task[i])
-  text_origin_aux<-as.character(unlist(corpus[(corpus$Category=="original") & (corpus$Task==aux_task),"Text_clean"]))
+  text_origin_aux<-as.character(unlist(corpus[(corpus$Category=="original") 
+                                              & (corpus$Task==aux_task),"Text_clean"]))
   text_plagio_aux<-data_no_original$Text_clean[[i]]
   aux_coincidencias<-comparar(text_origin_aux,text_plagio_aux)
   data_no_original$coincidencias[i]<-list(aux_coincidencias)
@@ -147,7 +143,6 @@ for (i in 1:nrow(data_no_original)){
 }
 
 #hacemos la cuenta de las coincidencias al final
-
 data_no_original$coincidencias_count<-sapply(data_no_original$coincidencias,length)
 
 ```
@@ -166,11 +161,13 @@ Y por ultimo hacemos un porcentaje de coincidencias/total *100
 ```{r}
 data_no_original$porcentaje<-0
 for (i in 1:nrow(data_no_original)){
-  data_no_original$porcentaje[i]<-100*(data_no_original$coincidencias_count[i]/data_no_original$total_words[i])
-  
+  data_no_original$porcentaje[i]<-100*(data_no_original$coincidencias_count[i]/
+                                         data_no_original$total_words[i])
 }
-
 ```
+
+# Resultados
+
 
 Veamos solo la columna de categoria, dificultad, task y porcentaje juntas:
 
