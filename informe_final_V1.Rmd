@@ -1,6 +1,6 @@
 ---
 title: "Trabajo Plagio Master"
-author: "Ángel Guevara Ros, Arturo  Sirvent Fresneda , Miguel Hortelano Busto , Francisco Olayo González Rodríguez"
+author: "Ángel Guevara Ros, Arturo  Sirvent Fresneda , Miguel Hortelano Busto ,<br/> Francisco Olayo González Rodríguez"
 date:  "`r Sys.Date()`" 
 output:
   html_document:
@@ -99,7 +99,7 @@ Primero exponemos las funciones básicas para este propósito:
 ```{r}
 #librerías para cargar los datos y preprocesarlos 
 
-texto<-" ¡ Esto es    un texto de prueba para demostrar la   limpieza incicial de los textos! (ááéçñ)"
+texto<-" ¡ Ésto és ún  TexTo De  çñ(Prúebá)"
 #pasarlo a minúsculas
 texto<-tolower(texto) 
 texto
