@@ -459,6 +459,12 @@ View(T_abcde)
 
 save(T_abcde,file="./Puntuaciones.Rdata")
 ```
+```{r}
+#CARGAMOS LOS DATOS
+
+load("Puntuaciones.Rdata")
+View(T_abcde)
+```
 
 ```{r}
 #install.packages("kableExtra")
