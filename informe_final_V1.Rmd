@@ -318,7 +318,7 @@ compara_djabbard <- function(original, sospechoso){
   or <- unlist(original)
   sus <- unlist(sospechoso)
   
-  dj <- length(intersect(sus,or))/length(union(sus,or))
+  dj <- 1 - length(intersect(sus,or))/length(union(sus,or))
   return(dj)
 }
 
