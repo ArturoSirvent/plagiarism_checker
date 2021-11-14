@@ -463,11 +463,9 @@ save(T_abcde,file="./Puntuaciones.Rdata")
 ```{r}
 #install.packages("kableExtra")
 library("kableExtra")
-
 variables <- c("Task","Category","djaccard","containment")
-tabla_resumen <- Ta[,variables]
+tabla_resumen <- T_abcde[,variables]
 kable(tabla_resumen)
-
 ```
 
 En la tabla podemos ver el porcentaje de plagio que se le asigna a la respuesta en función de la métrica usada. En general, vemos que todas funcionan bastante bien y nos dan un resultado acorde con la categoría, que recordemos que hace referencia al tipo de plagio que habían usado los alumnos para contestar a la pregunta.
@@ -502,6 +500,6 @@ T_abcde$Prediccion <- factor(T_abcde$Prediccion)
 confusionMatrix(T_abcde$Realidad,T_abcde$Prediccion)
 ```
 
-Para los no plagiados, tenemos un 100% de acierto.
+Observamos que tiene un accuracy del 78.36%, es decir, un acierto de casi el 80%. Es una medida bastante aceptable, por lo que podemos concluir que nuestro pequeño modelo nos sirve para detectar plagio con cierta fiabilidad en respuestas cortas escritas por alumnos.
 
 # Bibliofragia
