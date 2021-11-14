@@ -259,7 +259,6 @@ library(tidyr)
 library(tidytext)
 library(dplyr)
 library(ngram)
-
 #### funciones ####
 # Devuelve el texto introducido en forma de lista de Ngramas 
 agrupa <-function(text){
@@ -281,12 +280,30 @@ agrupa <-function(text){
 ```
 
 
-Una vez tenemos cada respuesta dividida en trigramas, podemos proceder a aplicar algunas de las métricas descritas en el trabajo para ver si hacen buenas predicciones. Hemos escogido las métricas de Jaccard, distancia LCS y la métrica de 'containment'. A continuación, mostramos una pequeña tabla dónde podemos ver el porcentaje de plagio que nos brinda cada una de las métricas, cuando comprobamos el nivel de plagio entre todas las respuestas de la primera pregunta (incluida la fuente de Wikipedia). Por lo tanto, tendremos una porcentaje de plagio para las 20 respuestas del data frame.
+```{r}
+agrupa <-function(text){
+  temp <-unlist(text)
+  temptemp <- temp[temp != ""]
+  
+  temp2 <- temp[1]
+  for(i in 2:length(temp)){
+    temp2 <- paste(temp2,temp[i])
+  }
+  temp2 <- gsub('[[:punct:] ]+',' ',temp2)%>%
+    tolower()
+  #%>%
+  #  strsplit(split="\\s")
+  
+  temp <- tibble(word = unlist(temp2))%>%
+    unnest_tokens(trigram, word,token = "ngrams",n=3)#cambiar el número para tamaño del ngrama
+}
+```
+
+
+Una vez tenemos cada respuesta dividida en trigramas, podemos proceder a aplicar algunas de las métricas descritas en el trabajo para ver si hacen buenas predicciones. Hemos escogido las métricas de Jaccard y la métrica de 'containment'. A continuación, mostramos una pequeña tabla dónde podemos ver el porcentaje de plagio que nos brinda cada una de las métricas, al comprobar el nivel de plagio entre algunas de las respuestas de la primera y la última pregunta (incluida la fuente de Wikipedia). 
 
 
 ```{r,include=FALSE}
-
-
 # Cuenta las veces que se repiten las palabras entre dos textos
 compara <- function(original, sospechoso){
   
@@ -317,66 +334,107 @@ compara <- function(original, sospechoso){
   }
   return(salida)
 }
-
 compara_djabbard <- function(original, sospechoso){
   
   or <- unlist(original)
   sus <- unlist(sospechoso)
   
-  dj <- 1 - length(intersect(sus,or))/length(union(sus,or))
+  dj <- length(intersect(sus,or))/length(union(sus,or))
   return(dj)
 }
-
 #### Limpieza de los datos ####
 load(file = "corpus_as_dataframe.Rda")
-Ta <- corpus[corpus$Task=="a",]
 
 
+#PREGUNTA A 
+
+#Ta <- corpus[corpus$Task=="a",]
 #La columna texto ahora está en forma de ngramas
-Ta$Text <- lapply(Ta$Text,FUN = agrupa)
-
-
+#Ta$Text <- lapply(Ta$Text,FUN = agrupa)
 #### comparamos Ngrams ###
-Original <- unlist(Ta$Text[20])
-Ta$djaccard <- lapply(Ta$Text,FUN = compara_djabbard,original = Original) #obtenemos lista con número de concidenca por ngrama
-aux2 <- lapply(Ta$Text,FUN = compara,original = Original)
-for (i in 1:length(Ta$Text)){
-  Ta$containment[i] <- aux2[[i]][1]
-  Ta$Coincidencias_containment[i] <- list(aux2[[i]][2: length(aux2[[i]])])
-}
-View(Ta)
+#Original <- unlist(Ta$Text[20])
+#Ta$djaccard <- lapply(Ta$Text,FUN = compara_djabbard,original = Original) #obtenemos lista con número de concidenca por ngrama
+#aux2 <- lapply(Ta$Text,FUN = compara,original = Original)
+#for (i in 1:length(Ta$Text)){
+#  Ta$containment[i] <- aux2[[i]][1]
+#  Ta$Coincidencias_containment[i] <- list(aux2[[i]][2: length(aux2[[i]])])
+#}
+#View(Ta)
+
 
 # visualizamos pasando los vectores de coincidencias a matrices y haciendo heatmap
-Ta$Ccmatrix <- lapply(Ta$Coincidencias_containment, matrix, ncol = 20)
-
-sapply(Ta$Ccmatrix,heatmap)
-heatmap(Ta$Ccmatrix[[2]],Rowv=NA,Colv=NA)
+#Ta$Ccmatrix <- lapply(Ta$Coincidencias_containment, matrix, ncol = 20)
+#sapply(Ta$Ccmatrix,heatmap)
+#heatmap(Ta$Ccmatrix[[2]],Rowv=NA,Colv=NA)
 ```
 
 
- 
+```{r}
+compara <- function(original, sospechoso){
+  
+  coinc <- c()
+  coinc2 <- c()
+  
+  or <- tibble(trigram = unlist(original))
+  sus <- tibble(trigram = unlist(unlist(sospechoso)))
+  
+  sus <- separate(sus,trigram,c("P1","P2","P3"),sep=" ")
+  or <- separate(or,trigram,c("P1","P2","P3"),sep=" ")
+  
+  for( i in 1:length(sus$P1)){
+    count <- 0;
+    count2 <- 0
+    sus_str <- c(sus[i,]$P1,sus[i,]$P2,sus[i,]$P3)
+    
+    for( j in 1:length(or$P1)){
+      or_str <- c(or[j,]$P1,or[j,]$P2,or[j,]$P3)
+      count <- count + all(or_str == sus_str)
+      count2 <- count2 + sum(or_str==sus_str)
+    }
+    
+    coinc <- append(coinc,count)     
+    coinc2 <- append(coinc2,count2)
+    score <- sum(coinc)/length(sus$P1)
+    salida <- c(score,coinc2)
+  }
+  return(salida)
+}
+compara_djabbard <- function(original, sospechoso){
+  
+  or <- unlist(original)
+  sus <- unlist(sospechoso)
+  
+  dj <- length(intersect(sus,or))/length(union(sus,or))
+  return(dj)
+}
+```
+
+
+
+
+
 
 ```{r,include=FALSE}
 
 # PREGUNTA B 
 
-Tb <- corpus[corpus$Task=="b",]
+#Tb <- corpus[corpus$Task=="b",]
 #La columna texto ahora está en forma de ngramas
-Tb$Text <- lapply(Tb$Text,FUN = agrupa)
+#Tb$Text <- lapply(Tb$Text,FUN = agrupa)
 #### comparamos Ngrams ###
-Original <- unlist(Tb$Text[20])
-Tb$djaccard <- lapply(Tb$Text,FUN = compara_djabbard,original = Original) #obtenemos lisTb con número de concidenca por ngrama
-aux2 <- lapply(Tb$Text,FUN = compara,original = Original)
-for (i in 1:length(Tb$Text)){
-  Tb$containment[i] <- aux2[[i]][1]
-  Tb$Coincidencias_containment[i] <- list(aux2[[i]][2: length(aux2[[i]])])
-}
-View(Tb)
+#Original <- unlist(Tb$Text[20])
+#Tb$djaccard <- lapply(Tb$Text,FUN = compara_djabbard,original = Original) #obtenemos lisTb con número de concidenca por ngrama
+#aux2 <- lapply(Tb$Text,FUN = compara,original = Original)
+#for (i in 1:length(Tb$Text)){
+#  Tb$containment[i] <- aux2[[i]][1]
+#  Tb$Coincidencias_containment[i] <- list(aux2[[i]][2: length(aux2[[i]])])
+#}
+#View(Tb)
 
 
-variables <- c("Task","Category","djaccard","containment")
-tabla_resumen_b <- Tb[,variables]
-kable(tabla_resumen_b)
+#variables <- c("Task","Category","djaccard","containment")
+#tabla_resumen_b <- Tb[,variables]
+#kable(tabla_resumen_b)
 ```
 
 
@@ -385,23 +443,23 @@ kable(tabla_resumen_b)
 
 # PREGUNTA C
 
-Tc <- corpus[corpus$Task=="c",]
+#Tc <- corpus[corpus$Task=="c",]
 #La columna texto ahora está en forma de ngramas
-Tc$Text <- lapply(Tc$Text,FUN = agrupa)
+#Tc$Text <- lapply(Tc$Text,FUN = agrupa)
 #### comparamos Ngrams ###
-Original <- unlist(Tc$Text[20])
-Tc$djaccard <- lapply(Tc$Text,FUN = compara_djabbard,original = Original) #obtenemos lisTb con número de concidenca por ngrama
-aux2 <- lapply(Tc$Text,FUN = compara,original = Original)
-for (i in 1:length(Tc$Text)){
-  Tc$containment[i] <- aux2[[i]][1]
-  Tc$Coincidencias_containment[i] <- list(aux2[[i]][2: length(aux2[[i]])])
-}
-View(Tc)
+#Original <- unlist(Tc$Text[20])
+#Tc$djaccard <- lapply(Tc$Text,FUN = compara_djabbard,original = Original) #obtenemos lisTb con número de concidenca por ngrama
+#aux2 <- lapply(Tc$Text,FUN = compara,original = Original)
+#for (i in 1:length(Tc$Text)){
+#  Tc$containment[i] <- aux2[[i]][1]
+#  Tc$Coincidencias_containment[i] <- list(aux2[[i]][2: length(aux2[[i]])])
+#}
+#View(Tc)
 
 
-variables <- c("Task","Category","djaccard","containment")
-tabla_resumen_c <- Tc[,variables]
-kable(tabla_resumen_c)
+#variables <- c("Task","Category","djaccard","containment")
+#tabla_resumen_c <- Tc[,variables]
+#kable(tabla_resumen_c)
 ```
 
 
@@ -410,80 +468,89 @@ kable(tabla_resumen_c)
 
 # PREGUNTA D
 
-Td <- corpus[corpus$Task=="d",]
+#Td <- corpus[corpus$Task=="d",]
 #La columna texto ahora está en forma de ngramas
-Td$Text <- lapply(Td$Text,FUN = agrupa)
+#Td$Text <- lapply(Td$Text,FUN = agrupa)
 #### comparamos Ngrams ###
-Original <- unlist(Td$Text[20])
-Td$djaccard <- lapply(Td$Text,FUN = compara_djabbard,original = Original) #obtenemos lisTb con número de concidenca por ngrama
-aux2 <- lapply(Td$Text,FUN = compara,original = Original)
-for (i in 1:length(Td$Text)){
-  Td$containment[i] <- aux2[[i]][1]
-  Td$Coincidencias_containment[i] <- list(aux2[[i]][2: length(aux2[[i]])])
-}
-View(Td)
+#Original <- unlist(Td$Text[20])
+#Td$djaccard <- lapply(Td$Text,FUN = compara_djabbard,original = Original) #obtenemos lisTb con número de concidenca por ngrama
+#aux2 <- lapply(Td$Text,FUN = compara,original = Original)
+#for (i in 1:length(Td$Text)){
+#  Td$containment[i] <- aux2[[i]][1]
+#  Td$Coincidencias_containment[i] <- list(aux2[[i]][2: length(aux2[[i]])])
+#}
+#View(Td)
 
 
-variables <- c("Task","Category","djaccard","containment")
-tabla_resumen_d <- Td[,variables]
-kable(tabla_resumen_d)
+#variables <- c("Task","Category","djaccard","containment")
+#tabla_resumen_d <- Td[,variables]
+#kable(tabla_resumen_d)
+```
+
+
+
+```{r,include=FALSE,eval=FALSE}
+
+# PREGUNTA E
+
+#Te <- corpus[corpus$Task=="e",]
+#La columna texto ahora está en forma de ngramas
+#Te$Text <- lapply(Te$Text,FUN = agrupa)
+#### comparamos Ngrams ###
+#Original <- unlist(Te$Text[20])
+#Te$djaccard <- lapply(Te$Text,FUN = compara_djabbard,original = Original) #obtenemos lisTb con número de concidenca por ngrama
+#aux2 <- lapply(Te$Text,FUN = compara,original = Original)
+#for (i in 1:length(Te$Text)){
+#  Te$containment[i] <- aux2[[i]][1]
+#  Te$Coincidencias_containment[i] <- list(aux2[[i]][2: length(aux2[[i]])])
+#}
+#View(Te)
+
+
+#variables <- c("Task","Category","djaccard","containment")
+#tabla_resumen_e <- Te[,variables]
+#kable(tabla_resumen_e)
 ```
 
 
 
 ```{r,include=FALSE}
+#Ta <- Ta[,-13]
+#View(Ta)
+#T_abcde <- rbind(Ta,Tb,Tc,Td,Te)
+#View(T_abcde)
 
-# PREGUNTA E
-
-Te <- corpus[corpus$Task=="e",]
-#La columna texto ahora está en forma de ngramas
-Te$Text <- lapply(Te$Text,FUN = agrupa)
-#### comparamos Ngrams ###
-Original <- unlist(Te$Text[20])
-Te$djaccard <- lapply(Te$Text,FUN = compara_djabbard,original = Original) #obtenemos lisTb con número de concidenca por ngrama
-aux2 <- lapply(Te$Text,FUN = compara,original = Original)
-for (i in 1:length(Te$Text)){
-  Te$containment[i] <- aux2[[i]][1]
-  Te$Coincidencias_containment[i] <- list(aux2[[i]][2: length(aux2[[i]])])
-}
-View(Te)
-
-
-variables <- c("Task","Category","djaccard","containment")
-tabla_resumen_e <- Te[,variables]
-kable(tabla_resumen_e)
+#save(T_abcde,file="./Puntuaciones.Rdata")
 ```
 
 
-
-```{r}
-Ta <- Ta[,-13]
-View(Ta)
-T_abcde <- rbind(Ta,Tb,Tc,Td,Te)
-View(T_abcde)
-
-save(T_abcde,file="./Puntuaciones.Rdata")
-```
-```{r}
+```{r,include=FALSE}
 #CARGAMOS LOS DATOS
 
 load("Puntuaciones.Rdata")
-View(T_abcde)
+#View(T_abcde)
 ```
 
-```{r}
+
+A continuación, mostramos unas tablas dónde podemos ver el porcentaje de plagio que se le asigna a la respuesta en función de la métrica usada. En general, vemos que todas funcionan bastante bien y nos dan un resultado acorde con la categoría, que recordemos que hace referencia al tipo de plagio que habían usado los alumnos para contestar a la pregunta.
+
+```{r,echo=FALSE}
 #install.packages("kableExtra")
 library("kableExtra")
 variables <- c("Task","Category","djaccard","containment")
 tabla_resumen <- T_abcde[,variables]
-kable(tabla_resumen)
+kable(head(tabla_resumen))
+kable(tail(tabla_resumen))
 ```
 
-En la tabla podemos ver el porcentaje de plagio que se le asigna a la respuesta en función de la métrica usada. En general, vemos que todas funcionan bastante bien y nos dan un resultado acorde con la categoría, que recordemos que hace referencia al tipo de plagio que habían usado los alumnos para contestar a la pregunta.
 
-Veamos lo bueno que es nuestro modelo para la tarea "a". Ahora vamos a suponer que tenemos solo dos categorías: PLAGIADO y NO PLAGIADO. Dentro de la categoría PLAGIADO están incluidas las categorías "cut", "light" y "heavy". Vamos a evaluar entonces los aciertos del modelo en función de las dos métricas utilizadas. Para ello, consideramos que una métrica de "containment" superior a 0.50 se considera dentro de la categoría PLAGIADO, y si obtenemos un "containment" por debajo de 0.5 consideraremos que estamos en la categoría NO PLAGIADO.
 
-```{r}
+Veamos lo bueno que es nuestro modelo. Ahora vamos a suponer que tenemos solo dos categorías: PLAGIADO y NO PLAGIADO. Dentro de la categoría PLAGIADO están incluidas las categorías "cut", "light" y "heavy". Vamos a evaluar entonces los aciertos del modelo en función de la métrica "containment". Para ello, consideramos que una métrica de "containment" superior a 0.50 se considera dentro de la categoría PLAGIADO, y si obtenemos un "containment" por debajo de 0.5 consideraremos que estamos en la categoría NO PLAGIADO. 
+
+Si realizamos la matriz de confusión, obtenemos el siguiente resultado.
+
+
+```{r,include=FALSE}
 #install.packages("caret")
 library("caret")
 
@@ -494,6 +561,7 @@ for (i in 1:dim(T_abcde)[1]){
     T_abcde$Prediccion[i] <- "PLAGIO"
   }
 }
+#View(T_abcde)
 
 for (i in 1:dim(T_abcde)[1]){
   if(T_abcde$Category[i]=="non"){
@@ -507,16 +575,18 @@ T_abcde$Realidad <- factor(T_abcde$Realidad)
 
 T_abcde$Prediccion <- factor(T_abcde$Prediccion)
 
+```
+
+```{r}
 confusionMatrix(T_abcde$Realidad,T_abcde$Prediccion)
 ```
 
-Observamos que tiene un accuracy del 78.36%, es decir, un acierto de casi el 80%. Es una medida bastante aceptable, por lo que podemos concluir que nuestro pequeño modelo nos sirve para detectar plagio con cierta fiabilidad en respuestas cortas escritas por alumnos. Tambén podemos visualizar la similitud de los textos gráficamente con esta métrica. En la siguiente ficura cada casilla es un ngrama, dispuesto de la manera en que estaría en un texto escrito, y el color representa la similitud encontrada de este ngrama en el texto original. Se aprecian las diferencias entre un texto con fragmentos copiado y pegado (izquierda), y otro sin plagio (derecha).
+Observamos que tiene un accuracy del 71%, es decir, acierta el 71% de las veces. Es una medida bastante aceptable, por lo que podemos concluir que nuestro pequeño modelo nos sirve para detectar plagio con cierta fiabilidad en respuestas cortas escritas por alumnos.
+
+Tambén podemos visualizar la similitud de los textos gráficamente con esta métrica. En la siguiente ficura cada casilla es un ngrama, dispuesto de la manera en que estaría en un texto escrito, y el color representa la similitud encontrada de este ngrama en el texto original. Se aprecian las diferencias entre un texto con fragmentos copiado y pegado (izquierda), y otro sin plagio (derecha).
 ![image](convssin.jpg)
 
 # Caso práctico (similitud semántica):
-
-
-# Comparación semántica.  
 
 Identificación de plagio mediante una sencilla comparación semántica.  
 La estrategia para esta técnica será la tokenización del texto en sus raíces semánticas, para luego realizar una comparación con las raíces semánticas del texto original.  
