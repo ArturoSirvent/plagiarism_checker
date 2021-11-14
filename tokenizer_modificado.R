@@ -88,3 +88,14 @@ Ta$Ccmatrix <- lapply(Ta$Coincount, matrix, ncol = 20)
 
 sapply(Ta$Ccmatrix,heatmap)
 heatmap(Ta$Ccmatrix[[2]],Rowv=NA,Colv=NA)
+
+
+
+# tabla resumen
+
+#install.packages("kableExtra")
+library("kableExtra")
+
+variables <- c("Task","Category","djaccard","containment")
+tabla_resumen <- Ta[,variables]
+kable(tabla_resumen)
