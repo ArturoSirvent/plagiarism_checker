@@ -1,6 +1,6 @@
 ---
 title: "Trabajo Plagio Master"
-author: "Ángel Guevara Ros, Arturo  ... , Miguel ... , Olayo"
+author: "Ángel Guevara Ros, Arturo  Sirvent Fresneda , Miguel Hortelano Busto , Francisco Olayo González Rodríguez"
 date:  "`r Sys.Date()`" 
 output:
   html_document:
