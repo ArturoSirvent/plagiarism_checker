@@ -24,7 +24,6 @@ library(tidyr)
 library(tidytext)
 library(dplyr)
 library(tm)
-library(ngram)
 library(stringr)
 library(readr)
 ```
@@ -168,7 +167,6 @@ for (i in 1:nrow(data_no_original)){
 
 # Resultados
 
-
 Veamos solo la columna de categoria, dificultad, task y porcentaje juntas:
 
 ```{r}
@@ -176,63 +174,48 @@ head(data_no_original[,c("Category","porcentaje","Task","Difficulty")],20)
 ```
 
 
-Para los casos con mayor porcentaje: 
-
-```{r}
-head(data_no_original[data_no_original$porcentaje>80,c("Category","porcentaje","Task","Difficulty")],20)
-```
-
-
-
-Y los casos con menos pocentaje son los non:
-```{r}
-head(data_no_original[data_no_original$porcentaje<60,c("Category","porcentaje","Task","Difficulty")],20)
-```
-
-
-Tenemos algunos `cut` que no son del 100%, esto habría que ver porqué. Seguro que algo de las stop-words...
-```{r}
-head(data_no_original[data_no_original$porcentaje<95 & data_no_original$Category=="cut",c("Category","porcentaje","Task","Difficulty")],20)
-```
-
-
-
-Y también vemos como algunos heavy tienen un porcentaje muy bajo:
-```{r}
-head(data_no_original[data_no_original$porcentaje<70 & data_no_original$Category=="heavy",c("Category","porcentaje","Task","Difficulty")],20)
-```
-
-
 El modelo es muy sencillo pero ha dado resultados bastante prometedores al menos en la clasificación NOPLAGIO--PLAGIO.
 
 Si ponemos 50 como limite, vemos la cantidad de plagios que se nos han colado:
 
-
 ```{r}
-sum(data_no_original$porcentaje<50 & data_no_original$Category!="non")/sum(data_no_original$porcentaje<50)*100
+library(knitr)
 ```
 
-Se nos han colado un  7.6%.
-
-
-Que porcentaje de los non clasificamos bien
-```{r}
-sum(data_no_original$porcentaje<50 & data_no_original$Category=="non")/sum( data_no_original$Category=="non")*100
-```
-EL 63 % de los non están bien clasificados.
-
-Y que porcentaje del resto se clasifican como plagio?
 
 ```{r}
-sum(data_no_original$porcentaje>50 & data_no_original$Category!="non")/sum( data_no_original$Category!="non")*100
+#Vamos a hacer una matriz de confusión para tener una idea de que
+#tan bien funciona el modelo.
+
+#true true
+#plagio as plagio
+TT<-sum(data_no_original$porcentaje>50 & data_no_original$Category!="non")/sum(data_no_original$porcentaje>50)*100
+
+#true false
+#plagio as no-plagio
+TF<-sum(data_no_original$porcentaje>50 & data_no_original$Category=="non")/sum(data_no_original$porcentaje>50)*100
+
+#false true
+#no-plagio as plagio
+FT<-sum(data_no_original$porcentaje<50 & data_no_original$Category!="non")/sum(data_no_original$porcentaje<50)*100
+
+#false false
+#no-plagio as no-plagio
+FF<-sum(data_no_original$porcentaje<50 & data_no_original$Category=="non")/sum(data_no_original$porcentaje<50)*100
+
+table_aux<-data.frame(matrix(c(TT,FT,TF,FF),ncol=2))
+colnames(table_aux)<-c("Real Plagio"," Real No-plagio")
+rownames(table_aux)<-c("Predicted Plagio","Predicted No-plagio")
+
+kable(table_aux,"pipe")
+
+
 ```
 
-El 96 porciento de los plagios si se clasifican.
+De la matriz anterior sacamos las siguientes observaciones:
 
-Pero que porcentaje de falsos positivos tenemos, estos son los que son mayor de 50% pero son non:
-
-```{r}
-sum(data_no_original$porcentaje>50 & data_no_original$Category=="non")/sum( data_no_original$porcentaje>50)*100
-```
-Solo un 20% se los que no debería clasificarse como plagio se clasifican como plagio.
+* Se ha confundido un 7.6% de no plagiados como sí plagiados.
+* El 63 % de los no plagio están bien clasificados.
+* El 96 % de los plagios si se clasifican.
+* Solo un 20% se los que no debería clasificarse como plagio se clasifican como plagio.
 
