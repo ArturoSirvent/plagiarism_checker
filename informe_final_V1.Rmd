@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r include=FALSE}
 # Especificamos las librerías necesarias en esta lista
 
-packages = c("dplyr", "ngram","readr", "tidytext","tidyr","tm","stringr")
+packages = c("dplyr", "kableExtra","ngram","readr", "tidytext","tidyr","tm","stringr")
 
 #use this function to check if each package is on the local machine
 #if a package is installed, it will be loaded
