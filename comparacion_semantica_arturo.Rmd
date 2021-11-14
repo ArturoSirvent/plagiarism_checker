@@ -22,6 +22,7 @@ Primero tenemos que pre-procesar el data set, limpiarlo, guardar todos los texto
 ```{r}
 library(tidyr)
 library(tidytext)
+library(knitr)
 library(dplyr)
 library(tm)
 library(stringr)
@@ -30,24 +31,19 @@ library(readr)
 
 ```{r}
 #cargamos los datos
-load(file = "./detector_coincidencias/corpus_as_dataframe.Rda")
+load(file = "corpus_as_dataframe.Rda")
 
 ```
 
 Creamos una función que deje el texto completamente limpio:
-
-
 ```{r}
 limpiar<-function(texto){
   aux_texto<-paste(unlist(texto),collapse=" ")
   aux_texto<-tolower(aux_texto) 
-  aux_texto<-gsub("[[:punct:]]"," ",aux_texto)
-  aux_texto<-gsub("(\\n)|(\\t)"," ",aux_texto)
-  aux_texto<-gsub("\\W"," ",aux_texto)
+  aux_texto<-gsub("([[:punct:]])|(\\n)|(\\t)|(\\W)"," ",aux_texto)
   #quitamos basicamente todo lo que no son letras y numeros
   aux_texto<-str_squish(aux_texto)
   aux_texto<-stringi::stri_trans_general(aux_texto,"Latin-ASCII") 
-  
   return(aux_texto)
 }
 
@@ -57,7 +53,6 @@ limpiar<-function(texto){
 #creamos una nueva columna para guardar los textos limpios
 corpus$Text_clean<-sapply(corpus$Text,limpiar)
 ```
-
 
 Ahora tenemos que eliminar las stop-words:
 
@@ -76,8 +71,7 @@ corpus$Text_clean<-unname(sapply(corpus$Text_clean,eliminar_stopwords))
 #por ello applicamos el unname()
 ```
 
-Ahora que tenemos el texto sin stop-words le vamos a aplicar el stemming para quedarnos con los morfemas
-
+Ahora que tenemos el texto sin stop-words le vamos a aplicar el stemming para quedarnos con los morfemas:  
 ```{r}
 steeming<-function(texto,lang="en",sep=" "){
   #libreria tm
@@ -105,10 +99,9 @@ Tal como hemos mencionado quedaría realizar una comprobación de las coincidenc
 
 Hacemos una función para comparar dos vectores de palabras. Esto será usado para comparar el texto supuestamente plagiado con el original.
 
-
 ```{r}
 comparar<- function(original,plagio){
-  #devolvemos las palabras que son coincidencias 
+  #devolvemos las palabras que son coincidencias entre ambas listas 
   aux_plagio<-unlist(plagio)
   aux_original<-unlist(original)
   result<-unname(aux_plagio[aux_plagio %in% aux_original ])
@@ -117,12 +110,10 @@ comparar<- function(original,plagio){
   }else{
     return(result)
   }
-  
 }
 ```
 
 Ahora que ya tenemos la función que nos hace la comparación solo debemos de crear una columna en el dataset con las coincidencias que encontremos con el original:
-
 
 ```{r}
 #Hacemos un loop que recorra todos los registros que no son "original" y según su tipo de
@@ -149,7 +140,6 @@ data_no_original$coincidencias_count<-sapply(data_no_original$coincidencias,leng
 
 Una vez tenemos las coincidencias, usaremos alguna de las métricas que ya hemos usado para hacer una estimación de un porcentaje de plagio.
 
-
 ```{r}
 #añadimos una nueva columna para hacer la cuenta del total de elementos en text_clean
 data_no_original$total_words<-sapply(data_no_original$Text_clean,length)
@@ -170,18 +160,13 @@ for (i in 1:nrow(data_no_original)){
 Veamos solo la columna de categoria, dificultad, task y porcentaje juntas:
 
 ```{r}
-head(data_no_original[,c("Category","porcentaje","Task","Difficulty")],20)
+head(data_no_original[,c("Category","porcentaje","Task","Difficulty")],10)
 ```
 
 
 El modelo es muy sencillo pero ha dado resultados bastante prometedores al menos en la clasificación NOPLAGIO--PLAGIO.
 
 Si ponemos 50 como limite, vemos la cantidad de plagios que se nos han colado:
-
-```{r}
-library(knitr)
-```
-
 
 ```{r}
 #Vamos a hacer una matriz de confusión para tener una idea de que
