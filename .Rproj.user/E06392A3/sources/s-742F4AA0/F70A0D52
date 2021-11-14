@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1636927298712.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3968598034",
+    "id" : "F70A0D52",
+    "lastKnownWriteTime" : 1636927618,
+    "last_content_update" : 1636927618359,
+    "path" : "~/GitHub/plagiarism_checker2/informe_final_V1.Rmd",
+    "project_path" : "informe_final_V1.Rmd",
+    "properties" : {
+        "cursorPosition" : "508,341",
+        "docOutlineVisible" : "1",
+        "scrollLine" : "505"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
