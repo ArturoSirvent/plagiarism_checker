@@ -1,6 +1,36 @@
 ---
 title: "Trabajo Plagio Master"
-output: html_document
+author: "Ángel Guevara Ros, Arturo  ... , Miguel ... , Olayo"
+date:  "`r Sys.Date()`" 
+output:
+  html_document:
+    echo: yes
+    number_sections: yes
+    theme: lumen
+    toc: yes
+  html_notebook:
+    echo: yes
+    number_sections: yes
+    toc: yes
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+language:
+  label:
+    fig: 'Figura '
+    tab: 'Tabla '
+    eq: 'Ecuación '
+    thm: 'Teorema '
+    lem: 'Lema '
+    def: 'Definición '
+    cor: 'Corolario '
+    prp: 'Proposición '
+    exm: 'Ejemplo '
+    exr: 'Ejercicio '
+    proof: 'Demostración. '
+    remark: 'Nota: '
+    solution: 'Solución. '
 bibliography: bibliography.bib
 ---
 
@@ -28,9 +58,7 @@ search()
 
 ```
 
-# Portada
 
-# Indice
 
 # Introducción y motivación
 
