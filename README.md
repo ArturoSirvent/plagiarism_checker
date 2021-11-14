@@ -1,6 +1,3 @@
-# Plagiarism Checker
-Trabajo de clase 
-
 <!DOCTYPE html>
 
 <html>
