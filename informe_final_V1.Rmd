@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r include=FALSE}
 # Especificamos las librerías necesarias en esta lista
 
-packages = c("dplyr", "ngram","readr", "tidytext","tidyr")
+packages = c("dplyr", "ngram","readr", "tidytext","tidyr","tm","stringr")
 
 #use this function to check if each package is on the local machine
 #if a package is installed, it will be loaded
@@ -71,8 +71,6 @@ El preporcesado es el primer contacto con los datos, las primeras tareas de limp
 Primero exponemos las funciones básicas para este propósito:
 ```{r}
 #librerías para cargar los datos y preprocesarlos 
-library(readr)
-library(stringr)
 
 texto<-" ¡ Esto es    un texto de prueba para demostrar la   limpieza incicial de los textos! (ááéçñ)"
 #pasarlo a minúsculas
@@ -108,9 +106,6 @@ Sin embargo esta sobre-simplificación puede no ser lo más recomendado en todos
 
 ```{r}
 #eliminar stop-words con la librería tm
-#librería tm
-
-library(tm)
 
 texto2<-removeWords(texto,stopwords("es"))
 texto2<-str_squish(texto2)
