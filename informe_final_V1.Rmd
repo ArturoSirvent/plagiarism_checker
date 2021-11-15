@@ -87,14 +87,15 @@ A lo largo de este trabajo, explicaremos como funcionan algunos de estos detecto
 En este apartado desarrollamos los conceptos y técnicas necesarias para llevar a cabo más tarde en un caso práctico la construcción de un detector de plagio. Esta teoría esta subdividida en los diferentes pasos a seguir en la práctica para el tratado de los datos y la construcción y evaluación del modelo.
 
 Atendiendo a los diferentes tipos de plagio y los métodos usados para su detección, podemos realizar distintas clasificaciones. A continuación se exponen algunas de ellas [@tipos1] [@tipos2]. 
-_Nota: También es muy importante diferenciar respecto al objeto de estudio. Si se está analizando plagio en código, las técnicas no serás igual que si estamos tratando con un artículo científico. Nuestro interés se centra en texto plano y no en código._
+_Nota: También es muy importante diferenciar respecto al objeto de estudio. Si se está analizando plagio en código, las técnicas no serán igual que si estamos tratando con un artículo científico. Nuestro interés se centra en texto plano y no en código._
 
 La clasificación menos relevante para nuestro trabajo sería la que atiende a la intención de quien escribe el texto. Dicha clasificación podría ser [@intencion]:
 
 ![Clasificación del pragio según la intención del escritor](diagrama_plagio_intencion.png)
 
 Una de las clasificaciones que se hacen más comúnmente sobre el plagio, son las de plagio intrínseco y el plagio extrínseco.
-* Plagio intrínseco: Se habla de plagio intrínseco cuando en un mismo documento o texto, cambia el estilo de redacción y se distinguen diferentes autores. Su nombre viene del hecho que no se requieren de bases de datos ni fuentes externas para la comparación. Como consecuencia, de dicho método solo podremos sacar una sospecha del plagio, pues no contaremos con la fuente del plagio.
+
+* Plagio intrínseco: Se habla de plagio intrínseco cuando en un mismo documento o texto, cambia el estilo de redacción y se distinguen diferentes autores. Su nombre viene del hecho que no se requieren de bases de datos ni fuentes externas para la comparación. Como consecuencia de dicho método, solo podremos sacar una sospecha del plagio, pues no contaremos con la fuente del plagio.
 
 * Plagio extrínseco: Donde los recursos originales o fuente del plagio son usados y comparados con el texto a analizar. El plagio no solo puede venir de una copia textual entre documento original y ejemplar (llamado _plagio literal_ o _copia-pega_), si se usan sinónimos y se reescriben las oraciones de manera similar, deberemos atender a la similitud entre ambos documentos (este tipo de plagio es llamado _plagio inteligente_). Esta similitud puede separarse en:
   * Similitud Semántica: Considerando el uso de sinónimos, se busca la similitud de la estructura por **palabras**.
@@ -103,7 +104,7 @@ Una de las clasificaciones que se hacen más comúnmente sobre el plagio, son la
 ![Clasificación del plagio](plagio_tax.png)
  
 ## Corpus
-Un corpus lingüístico es un conjunto de textos variados que cumple la función de representar el uso real de la lengua que se quiere examinar. En el caso del procesamiento de texto es necesario contar con un corpus adecuado al campo y características que se buscan extraer. En nuestro caso hacemos uso del corpus proporcionado por miembros de la universidad de Sheffield [@corpus_source]. Consta de un set de 5 cuestiones que veinte alumnos tuvieron que responder. Los alumnos se dividieron en cuatro grupos que podían responder las preguntas con materiales externos o consultando páginas de Wikipedia, permitiéndose niveles diferentes de copia y referencia. De esta forma tenemos diferentes grados de plagio con el documento original, que van del corta y pega al no uso de la fuente, y una fácil comparación. Además de todas estas respuestas, también se proporciona un índice con el alumno que escribió cada texto, cual era la pregunta original y el nivel de copia (near copy, light revision, heavy revision, non- plagiarism) debidamente indexado. EN resumidas cuentas, nuestro corpus cuenta con 100 textos breves (entre 200 y 300 palabras) con diferentes niveles de plagio, de manera que son lo suficientemente largos para realizar un análisis didáctico sin convertirse en una carga difícil de procesar con nuestros medios.
+Un corpus lingüístico es un conjunto de textos variados que cumple la función de representar el uso real de la lengua que se quiere examinar. En el caso del procesamiento de texto es necesario contar con un corpus adecuado al campo y características que se buscan extraer. En nuestro caso hacemos uso del corpus proporcionado por miembros de la universidad de Sheffield [@corpus_source]. Consta de un set de 5 cuestiones que veinte alumnos tuvieron que responder. Los alumnos se dividieron en cuatro grupos que podían responder las preguntas con materiales externos o consultando páginas de Wikipedia, permitiéndose niveles diferentes de copia y referencia. De esta forma tenemos diferentes grados de plagio con el documento original, que van del corta y pega al no uso de la fuente, y una fácil comparación. Además de todas estas respuestas, también se proporciona un índice con el alumno que escribió cada texto, cual era la pregunta original y el nivel de copia (near copy, light revision, heavy revision, non- plagiarism) debidamente indexado. En resumidas cuentas, nuestro corpus cuenta con 100 textos breves (entre 200 y 300 palabras) con diferentes niveles de plagio, de manera que son lo suficientemente largos para realizar un análisis didáctico sin convertirse en una carga difícil de procesar con nuestros medios.
 
 ## Preprocesado   
 
@@ -142,7 +143,7 @@ texto
 ```
 
 
-Una limpieza más intensiva podría seguir con la eliminación de palabras unión `stop-words` y hasta la reducción de palabras hasta su raíz (término _stemming_ en inglés).Para este propósito hay librerías que implementan funciones para dicho proposito en R, algunas de ellas son `tm` y `tidytext`.  
+Una limpieza más intensiva podría seguir con la eliminación de palabras unión `stop-words` y hasta la reducción de palabras hasta su raíz (término _stemming_ en inglés).Hay librerías que implementan funciones para dicho proposito en R, algunas de ellas son `tm` y `tidytext`.  
 Sin embargo esta sobre-simplificación puede no ser lo más recomendado en todos los casos. La elección será muy dependiente del algoritmo y del tipo de plagio buscado (ya hemos comentado previamente que hay diferentes tipos de plagio a detectar).
 
 ```{r}
@@ -165,22 +166,22 @@ texto3
 
 ## Tokenizado
 
-Una vez importado el corpus y depurado los datos, el siguiente paso es tokemizarlos. Esto consiste en separar en elementos más pequeños el conjunto de datos que tenemos. Hablando de datos de tipo texo, tokemizar podría ser separar en palabras o en frases por ejemplo. La función `strsplit()` nos permitiría hacer variando el argumento de separación, `split`  según nos convenga.
+Una vez importado el corpus y depurado los datos, el siguiente paso es tokemizarlos. Esto consiste en separar en elementos más pequeños el conjunto de datos que tenemos. Hablando de datos de tipo texo, tokemizar podría ser separar en palabras o en frases por ejemplo. La función `strsplit()` nos permitiría hacer dichas acciones variando el argumento de separación, `split`,  según nos convenga.
 
   - `split=" "` un espacio podría servir para separar en palabras. 
   - `split="."` un punto podría servir para separar en frases. 
 
-Sin embargo, en este caso nos va a interesar usar N-gramas, que son subconjuntos del conjunto original que van cogiendo combinaciones de n elementos y dónde el elemento siguiente está formado por los (n-1) elementos del anterior más un elemento nuevo. Por ejemplo, si tenemos el texto: "Hoy hemos quedado en la rusa a las seis". Su división en 3-gramas (o trigramas) sería: 
+Sin embargo, en este caso nos va a interesar usar N-gramas, que son subconjuntos del conjunto original que van cogiendo combinaciones de n elementos y dónde el elemento siguiente está formado por los (n-1) elementos del anterior N-grama más un elemento nuevo. Por ejemplo, si tenemos el texto: "Hoy hemos quedado en la rusa a las seis". Su división en 3-gramas (o trigramas) sería: 
 
 [Hoy hemos quedado], [hemos quedado en], [quedado en la], [en la rusa],[la rusa a], [rusa a las],[a las seis]. 
 
 En R, se puede hacer fácilmente usando el paquete `ngram`, y más concretamente la función `unnest_tokens()`, que toma como argumentos principales los siguientes: 
 
-  - `tbl` un data frame
-  - `output` el nombre de la columna que se va  crear
-  - `input` los datos que queremos usar.
-  - `token` a qué token queremos convertirlos (en este caso el que más nos interesa es "ngrams")
-  - `n` argumento adicional para n-gramas para indicar el tamaño de éstos.
+  - `tbl`: un data frame
+  - `output`: el nombre de la columna que se va  crear
+  - `input`: los datos que queremos usar.
+  - `token`: a qué token queremos convertirlos (en este caso el que más nos interesa es "ngrams")
+  - `n`: argumento adicional para n-gramas para indicar el tamaño de éstos.
   
 Los N-gramas son muy utilizados en aplicaciones de análisis de texto, como por ejemplo en la detección de plagio. La similitud entre dos textos se puede calcular contando el número de N-gramas que tienen en común.
 
