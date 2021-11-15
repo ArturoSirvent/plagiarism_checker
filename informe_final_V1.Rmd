@@ -264,7 +264,9 @@ Por ejemplo entre las palabras 'palabras' y 'paralelas', con el método de sub-p
 
 En este apartado, vamos a aplicar los procedimientos descritos a lo largo del trabajo a un caso real de detección de plagio, descrito en el apartado del Corpus. En primer lugar veremos un caso de similitud semántica, y después veremos otro caso en el que se hace un tokenizado por N-gramas. 
 
-
+```{r,include=FALSE}
+load(file = "corpus_as_dataframe.Rda")
+```
 
 ## Caso práctico 1 (similitud semántica):
 
@@ -469,7 +471,7 @@ De la matriz anterior sacamos las siguientes observaciones:
 
 
 
-## Caso práctico 2
+## Caso práctico 2 (N-gramas)
 
 Para el análsis, nosotros lo que tendremos será un data frame con 100 muestras, de las cuales las 95 primeras muestras son la respuesta a una de las preguntas por parte de los alumnos, y las 5 últimas muestras son los enlaces a Wikipedia que podían consultar para responder a cada una de las 5 preguntas. Algunas de las columnas de ese data frame serán: el tipo de plagio con el que se pedía responder, la pregunta que se responde, el individuo que la responde y la respuesta en forma de cadena de texto.
 
