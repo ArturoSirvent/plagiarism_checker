@@ -143,7 +143,7 @@ texto
 ```
 
 
-Una limpieza más intensiva podría seguir con la eliminación de palabras unión `stop-words` y hasta la reducción de palabras hasta su raíz (término _stemming_ en inglés).Hay librerías que implementan funciones para dicho proposito en R, algunas de ellas son `tm` y `tidytext`.  
+Una limpieza más intensiva podría seguir con la eliminación de palabras unión `stop-words` y hasta la reducción de palabras hasta su raíz (término _stemming_ en inglés). Hay librerías que implementan funciones para dicho proposito en R, algunas de ellas son `tm` y `tidytext`.  
 Sin embargo esta sobre-simplificación puede no ser lo más recomendado en todos los casos. La elección será muy dependiente del algoritmo y del tipo de plagio buscado (ya hemos comentado previamente que hay diferentes tipos de plagio a detectar).
 
 ```{r}
