@@ -28,7 +28,7 @@ search()
 
 En los últimos años, el plagio y su detección se han posicionado como un problema en crecimiento dentro del ámbito académico. Según la Real Academia Española (RAE), plagiar es la acción de copiar en lo sustancial obras ajenas dándolas como propias. En el caso de textos, plagiar es la acción de atribuirse la autoría de fragmentos o ideas cuya propiedad intelectual no le corresponde al autor [@intro]. 
 
-Debido al aumento de este problema, han surgido diferentes soluciones por parte del mundo empresarial y del educativo. Entre otras, el desarrollo de sistemas para ayudar a los educadores en la ardua tarea de identificar trabajos plagiados, o incluso el desarrollo de sistemas que son capaces de detectar el plagio automáticamente.
+Debido al aumento de interés en la detección de plagio, han surgido diferentes soluciones por parte del mundo empresarial y del educativo. Entre otras, el desarrollo de sistemas para ayudar a los educadores en la ardua tarea de identificar trabajos plagiados, o incluso el desarrollo de sistemas que son capaces de detectar el plagio automáticamente.
 
 Uno de los problemas de estos sistemas de detección de plagio es la falta de datos para entrenar los modelos ya que no hay muchos repositorios con textos que estén admitidos como plagiados. Esto se debe a la ilegalidad de publicar textos plagiados. Por eso, en este trabajo usaremos un corpus de texto plagiado que ha sido simulado por los investigadores y que está disponible para uso libre. 
 
@@ -51,7 +51,8 @@ A lo largo de este trabajo, explicaremos como funcionan algunos de estos detecto
 
 En este apartado desarrollamos los conceptos y técnicas necesarias para llevar a cabo más tarde en un caso práctico la construcción de un detector de plagio. Esta teoría esta subdividida en los diferentes pasos a seguir en la práctica para el tratado de los datos y la construcción y evaluación del modelo.
 
-Atendiendo a los diferentes tipos de plagio y los métodos usados para su detección, podemos realizar distintas clasificaciones. A continuación se exponen algunas de ellas [@tipos1] [@tipos2]. 
+Atendiendo a los diferentes tipos de plagio y los métodos usados para su detección, podemos realizar distintas clasificaciones. A continuación se exponen algunas de ellas [@tipos1] [@tipos2].  
+
 _Nota: También es muy importante diferenciar respecto al objeto de estudio. Si se está analizando plagio en código, las técnicas no serán igual que si estamos tratando con un artículo científico. Nuestro interés se centra en texto plano y no en código._
 
 La clasificación menos relevante para nuestro trabajo sería la que atiende a la intención de quien escribe el texto. Dicha clasificación podría ser [@intencion]:
@@ -99,7 +100,7 @@ texto<-gsub("\\s+"," ",str_trim(texto))
 texto
 ```
 
-En el caso de que el idioma tenga acentuación, sería recomendable eliminarla para no tener problemas de formato ni considerar diferentes palabras iguales solo por estar acentuada o no. Esto lo podemos hacer de forma sencilla usando stringi::stri_trans_general()
+En el caso de que el idioma tenga acentuación, sería recomendable eliminarla para no tener problemas de formato ni considerar diferentes palabras iguales solo por estar acentuada o no. Esto lo podemos hacer de forma sencilla usando `stringi::stri_trans_general()`.
 ```{r}
 
 texto<-stringi::stri_trans_general(texto,"Latin-ASCII") 
@@ -131,7 +132,7 @@ texto3
 
 ## Tokenizado
 
-Una vez importado el corpus y depurado los datos, el siguiente paso es tokemizarlos. Esto consiste en separar en elementos más pequeños el conjunto de datos que tenemos. Hablando de datos de tipo texo, tokemizar podría ser separar en palabras o en frases por ejemplo. La función `strsplit()` nos permitiría hacer dichas acciones variando el argumento de separación, `split`,  según nos convenga.
+Una vez importado el corpus y depurado los datos, el siguiente paso es tokenizarlos. Esto consiste en separar en elementos más pequeños el conjunto de datos que tenemos. Hablando de datos de tipo texto, tokenizar podría ser separar en palabras o en frases por ejemplo. La función `strsplit()` nos permitiría hacer dichas acciones variando el argumento de separación, `split`,  según nos convenga.
 
   - `split=" "` un espacio podría servir para separar en palabras. 
   - `split="."` un punto podría servir para separar en frases. 
@@ -151,17 +152,17 @@ En R, se puede hacer fácilmente usando el paquete `ngram`, y más concretamente
 Los N-gramas son muy utilizados en aplicaciones de análisis de texto, como por ejemplo en la detección de plagio. La similitud entre dos textos se puede calcular contando el número de N-gramas que tienen en común.
 
 
-## Metricas y modelos
+## Métricas y modelos
 
 Las métricas y modelos utilizados a la hora de evaluar los niveles de plagio entre textos, ya sean del mismo autor, o de varios, se deben dividir en varios grupos, dependiendo de la previa tokenización, agrupación de las palabras o letras del corpus.[@art1]
 
 ### Métricas basadas en similitudes de tokenes
 
-Una de las formas más utilizadas a la hora de comparar bloques de texto es la de comparaciones vectoriales, en las que, por ejemplo, cada palabra se convierte en el índice de un vector, y la cantidad de veces que aparece es su escalar. Utilizando este proceso, tambien se puede extrapolar de manera que en vez de contar las palabras, se cuente los pares o trios de palabras, lo que vendria a ser separacion en n-gramas(bigramas o trigramas).[@art3]
+Una de las formas más utilizadas a la hora de comparar bloques de texto es la de comparaciones vectoriales, en las que, por ejemplo, cada palabra se convierte en el índice de un vector, y la cantidad de veces que aparece es su escalar. Utilizando este proceso, también se puede extrapolar de manera que en vez de contar las palabras, se cuente los pares o trios de palabras, lo que vendría a ser separación en n-gramas(bigramas o trigramas).[@art3]
 
 Son bastante eficientes en general, y funcionan bien para textos largos a diferencia de los otros tipos de métricas.
 
-Para esta tokenización, las métricas mas utilizadas, son las de medida de distancia entre un texto y otro, comparando vector a vector.
+Para esta tokenización, las métricas más utilizadas, son las de medida de distancia entre un texto y otro, comparando vector a vector.
 
 -Una primera métrica seria la de **Jaccard**.
 
@@ -172,7 +173,7 @@ $D_{jaccard}\left ( X,Y \right )=\frac{\sum x_{i}\cap y_{i} }{\sum x_{i}\cup y_{
 En términos generales, consiste en dividir el vocabulario común de los documentos entre el vocabulario de la unión de ambos documentos, por lo que, cuanto más cerca están de 1 más parecidos son y lejanos cuando se acercan a 0.
 
 -La siguiente métrica es muy parecida ya que es la de **Jaccard pesada**.
-En esta métrica se tiene en cuenta tambien la cantidad potencial de coincidencias.
+En esta métrica se tiene en cuenta también la cantidad potencial de coincidencias.
 
 $D_{wjaccard}\left( X,Y\right )=\frac{\sum min\left ( x,y \right ) }{\sum max(x,y)}$
 
@@ -757,9 +758,9 @@ confusionMatrix(T_abcde$Prediccion,T_abcde$Realidad)
 
 Observamos que tiene un accuracy del 71%, es decir, acierta el 71% de las veces. Es una medida bastante aceptable, por lo que podemos concluir que nuestro pequeño modelo nos sirve para detectar plagio con cierta fiabilidad en respuestas cortas escritas por alumnos.
 
-Tambén podemos visualizar la similitud de los textos gráficamente con esta métrica. En la siguiente figura cada casilla es un ngrama, dispuesto de la manera en que estaría en un texto escrito, y el color representa la similitud encontrada de este ngrama en el texto original. Se aprecian las diferencias entre un texto con fragmentos copiados y pegados (izquierda), y otro sin plagio (derecha).
+También podemos visualizar la similitud de los textos gráficamente con esta métrica. En la siguiente figura cada casilla es un ngrama, dispuesto de la manera en que estaría en un texto escrito, y el color representa la similitud encontrada de este ngrama en el texto original. Se aprecian las diferencias entre un texto con fragmentos copiados y pegados (izquierda), y otro sin plagio (derecha).
 
-![image](convssin.jpg)
+![Mapa de calor coincidencia trigramas(Izquierda plagio, Derecha sin plagio)](convssin.jpg)
 
 
 
