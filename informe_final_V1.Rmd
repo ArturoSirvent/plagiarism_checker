@@ -67,6 +67,20 @@ Debido al aumento de este problema, han surgido diferentes soluciones por parte 
 
 Uno de los problemas de estos sistemas de detección de plagio es la falta de datos para entrenar los modelos ya que no hay muchos repositorios con textos que estén admitidos como plagiados. Esto se debe a la ilegalidad de publicar textos plagiados. Por eso, en este trabajo usaremos un corpus de texto plagiado que ha sido simulado por los investigadores y que está disponible para uso libre. 
 
+A lo largo de este trabajo, explicaremos como funcionan algunos de estos detectores de plagio, incluyendo todas las etapas del proceso: 
+
+\begin{itemize}
+
+  \item Desarrollo de un corpus de textos.
+  
+  \item Preprocesado del texto previo al análisis.
+  
+  \item Comparación de textos a través de una métrica.
+  
+  \item Evaluación de resultados.
+  
+\end{itemize}
+
 # Teoria
 
 
