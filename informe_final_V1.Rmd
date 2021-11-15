@@ -206,7 +206,7 @@ $D_{jaccard}\left ( X,Y \right )=1- \frac{\sum x_{i}\cap y_{i} }{\sum x_{i}\cup 
 
 En términos generales, consiste en dividir el vocabulario común de los documentos entre el vocabulario de la unión de ambos documentos, y le restamos 1 para que dos vectores sean parecidos cuando estan cerca de 0 y lejanos cuando se acercan a 1.
 
--La siguiente métrica es muy parecida ya que es la **Jaccard pesada**.
+-La siguiente métrica es muy parecida ya que es la de **Jaccard pesada**.
 En esta métrica se tiene en cuenta tambien la cantidad potencial de coincidencias.
 
 $D_{wjaccard}\left( X,Y\right )=1- \frac{\sum min\left ( x,y \right ) }{\sum max(x,y)}$
@@ -215,7 +215,7 @@ $D_{wjaccard}\left( X,Y\right )=1- \frac{\sum min\left ( x,y \right ) }{\sum max
 
 $D_{sorensen}\left ( X,Y \right )=1- \frac{2*\sum x_{i}\cap y_{i} }{\sum x_{j}\cap 1+\sum y_{k}\cap 1}$
 
-Consiste en dividir la cantidad de palabras comunes se multiplican por 2, ya que se repiten al ser comunes. Esto se divide por todas las palabras tipo de ambos documentos.
+Consiste en dividir la cantidad de palabras comunes multiplicadas por 2, ya que se repiten al ser comunes. Esto se divide por todas las palabras tipo de ambos documentos.
 
 -Con **Jaccard** y **Sorensen**, aparece un problema y es que si uno de los dos textos a comparar tiene un tamaño mucho mayor que otro, las distancias tienden siempre a cero, por ello **Overlap** trata de disminuir este problema al dividirlo por el vocabulario más pequeño que corresponde a uno de los documentos.
 
@@ -240,7 +240,7 @@ Se suelen utilizar para comparar distancias linguisticas entre diferentes idioma
 
 -Distancia de **Hamming**.
 
-Compara cada letra de dos palabras basadas por su posición, su ventaja es su velocidad y simplicidad, por el contrario, es muy estricto, ya que necesita que ambas palabras sean del mismo tamaño.
+Compara cada letra de dos palabras basadas por su posición, su ventaja es su velocidad y simplicidad. Por el contrario, es muy estricto ya que necesita que ambas palabras sean del mismo tamaño.
 
 -Distancia de **Levenshtein**.
 
@@ -254,9 +254,9 @@ Esta distancia en general es más completa y compleja que la distancia de Hammin
 
 ### Métricas basadas en las secuencias de palabras
 
-Compara las diferencias entre dos palabras, teniendo en cuenta las sub-palabras o sub-cadenas de palabras más largas dentro de las palabras inciales. (Longest common subsequence and longest common substring)
+Compara las diferencias entre dos palabras, teniendo en cuenta las sub-palabras o sub-cadenas de palabras más largas dentro de las palabras iniciales. (Longest common subsequence and longest common substring)
 
-La diferencia básica entre las sub-palabras y sub-cadenas de palabras, reside en que el primero utiliza letras dentro de la palabra sin necesidad de que sean contiguas, y el segundo si implica que esté una contigua a la otra.
+La diferencia básica entre las sub-palabras y las sub-cadenas de palabras, reside en que el primero utiliza letras dentro de la palabra sin necesidad de que sean contiguas, y el segundo si implica que esté una contigua a la otra.
 Por ejemplo entre las palabras 'palabras' y 'paralelas', con el método de sub-palabras tendrían en común : 'palas', mientras que con el método de sub-cadenas sería: 'pala' y 'para'.
 
 
@@ -264,7 +264,7 @@ Por ejemplo entre las palabras 'palabras' y 'paralelas', con el método de sub-p
 
 En este apartado, vamos a aplicar los procedimientos descritos a lo largo del trabajo a un caso real de detección de plagio, descrito en el apartado del Corpus.  
 
-Para el análsis, nosotros lo que tendremos será un data frame con 100 muestras,de las cuales las 95 primeras muestras son la respuesta a una de las preguntas por parte de los alumnos, y las 5 últimas muestras son los enlaces a Wikipedia que podían consultar para responder a cada una de las 5 preguntas. Algunas de las columnas de ese data frame serán el tipo de plagio con el que se pedía responder, la pregunta que se responde, el individuo que la responde y la respuesta en forma de cadena de texto.
+Para el análsis, nosotros lo que tendremos será un data frame con 100 muestras, de las cuales las 95 primeras muestras son la respuesta a una de las preguntas por parte de los alumnos, y las 5 últimas muestras son los enlaces a Wikipedia que podían consultar para responder a cada una de las 5 preguntas. Algunas de las columnas de ese data frame serán: el tipo de plagio con el que se pedía responder, la pregunta que se responde, el individuo que la responde y la respuesta en forma de cadena de texto.
 
 Una vez que tenemos el data frame, lo primero que hacemos es depurar la columna que contiene la respuesta tal y como se ha explicado en el apartado de preprocesado de los datos. En particular, desarrollamos una función `agrupa()` que elimina los signos de puntuación y convierte todo a minúsculas. Una vez hecho esto, dividimos cada una de las respuestas en N-gramas, en concreto hemos cogido N=3 ya que se ha visto que es la que mejor funciona.
 
@@ -290,7 +290,7 @@ agrupa <-function(text){
   #  strsplit(split="\\s")
   
   temp <- tibble(word = unlist(temp2))%>%
-    unnest_tokens(trigram, word,token = "ngrams",n=3)#cambiar el número para tamaño del ngrama
+    unnest_tokens(trigram, word,token = "ngrams",n=3) #cambiar el número para tamaño del ngrama
 }
 ```
 
@@ -315,7 +315,7 @@ agrupa <-function(text){
 ```
 
 
-Una vez tenemos cada respuesta dividida en trigramas, podemos proceder a aplicar algunas de las métricas descritas en el trabajo para ver si hacen buenas predicciones. Hemos escogido las métricas de Jaccard y la métrica de 'containment'. Hemos definido las siguientes funciones que nos calculan cada una de las métricas respectivamente.
+Una vez tenemos cada respuesta dividida en trigramas, podemos proceder a aplicar algunas de las métricas descritas en el trabajo para ver si hacen buenas predicciones. Hemos escogido las métricas de Jaccard y la métrica de 'containment'. Definimos las siguientes funciones que nos calculan cada una de las métricas respectivamente.
 
 
 ```{r,include=FALSE}
@@ -424,11 +424,6 @@ compara_djabbard <- function(original, sospechoso){
 }
 ```
 
-
-
-
-
-
 ```{r,include=FALSE}
 
 # PREGUNTA B 
@@ -451,8 +446,6 @@ compara_djabbard <- function(original, sospechoso){
 #tabla_resumen_b <- Tb[,variables]
 #kable(tabla_resumen_b)
 ```
-
-
 
 ```{r,include=FALSE}
 
@@ -477,8 +470,6 @@ compara_djabbard <- function(original, sospechoso){
 #kable(tabla_resumen_c)
 ```
 
-
-
 ```{r,include=FALSE}
 
 # PREGUNTA D
@@ -501,8 +492,6 @@ compara_djabbard <- function(original, sospechoso){
 #tabla_resumen_d <- Td[,variables]
 #kable(tabla_resumen_d)
 ```
-
-
 
 ```{r,include=FALSE,eval=FALSE}
 
@@ -527,8 +516,6 @@ compara_djabbard <- function(original, sospechoso){
 #kable(tabla_resumen_e)
 ```
 
-
-
 ```{r,include=FALSE}
 #Ta <- Ta[,-13]
 #View(Ta)
@@ -537,7 +524,6 @@ compara_djabbard <- function(original, sospechoso){
 
 #save(T_abcde,file="./Puntuaciones.Rdata")
 ```
-
 
 ```{r,include=FALSE}
 #CARGAMOS LOS DATOS
@@ -559,7 +545,7 @@ kable(tail(tabla_resumen))
 ```
 
 
-En las tablas dónde podemos ver el porcentaje de plagio que se le asigna a la respuesta en función de la métrica usada. En general, vemos que todas funcionan bastante bien y nos dan un resultado acorde con la categoría, que recordemos que hace referencia al tipo de plagio que habían usado los alumnos para contestar a la pregunta.
+En las tablas podemos ver el porcentaje de plagio que se le asigna a la respuesta en función de la métrica usada. En general, vemos que todas funcionan bastante bien y nos dan un resultado acorde con la categoría, que recordemos que hace referencia al tipo de plagio que habían usado los alumnos para contestar a la pregunta.
 
 Veamos lo bueno que es nuestro modelo. Ahora vamos a suponer que tenemos solo dos categorías: PLAGIADO y NO PLAGIADO. Dentro de la categoría PLAGIADO están incluidas las categorías "cut", "light" y "heavy". Vamos a evaluar entonces los aciertos del modelo en función de la métrica "containment". Para ello, consideramos que una métrica de "containment" superior a 0.50 se considera dentro de la categoría PLAGIADO, y si obtenemos un "containment" por debajo de 0.5 consideraremos que estamos en la categoría NO PLAGIADO. 
 
@@ -599,7 +585,7 @@ confusionMatrix(T_abcde$Realidad,T_abcde$Prediccion)
 
 Observamos que tiene un accuracy del 71%, es decir, acierta el 71% de las veces. Es una medida bastante aceptable, por lo que podemos concluir que nuestro pequeño modelo nos sirve para detectar plagio con cierta fiabilidad en respuestas cortas escritas por alumnos.
 
-Tambén podemos visualizar la similitud de los textos gráficamente con esta métrica. En la siguiente ficura cada casilla es un ngrama, dispuesto de la manera en que estaría en un texto escrito, y el color representa la similitud encontrada de este ngrama en el texto original. Se aprecian las diferencias entre un texto con fragmentos copiado y pegado (izquierda), y otro sin plagio (derecha).
+Tambén podemos visualizar la similitud de los textos gráficamente con esta métrica. En la siguiente figura cada casilla es un ngrama, dispuesto de la manera en que estaría en un texto escrito, y el color representa la similitud encontrada de este ngrama en el texto original. Se aprecian las diferencias entre un texto con fragmentos copiados y pegados (izquierda), y otro sin plagio (derecha).
 ![image](convssin.jpg)
 
 # Caso práctico (similitud semántica):
@@ -726,7 +712,7 @@ for (i in 1:nrow(data_no_original)){
 El proceso seguido ha sido:   
 Pre-procesado del texto para dejarlo limpio, eliminación de las stop-words, y tokenizado según sus raíces. Finalmente realizamos una sencilla comparación elemento a elemento entre el texto original y el que se está analizando. De esta comparación obtedremos una lista con las raices coincidentes. Por último, para realizar un análisis de los resultados, se obtuvieron porcentajes para cada texto, dividiendo las raices comunes entre todas las palabras del texto a analizar.  
 
-Una vez tenemos el porcentaje de palabras plagiadas para cada texto, podemos establecer un umbral para clasificarlo como **plagio** y así determinar la precisión etc. En nuestro caso escogimos un umbral de **50%**, pero esto es un parámetro que se puede _tunear_ para obtener el mejor rendimiento del modelo.
+Una vez tenemos el porcentaje de palabras plagiadas para cada texto, podemos establecer un umbral para clasificarlo como **plagio** y así determinar la precisión. En nuestro caso escogimos un umbral de **50%**, pero esto es un parámetro que se puede _tunear_ para obtener el mejor rendimiento del modelo.
 
 ```{r,include=FALSE}
 #Matrix de confusion mal
