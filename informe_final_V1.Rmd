@@ -108,7 +108,7 @@ Un corpus lingüístico es un conjunto de textos variados que cumple la función
 
 ## Preprocesado   
 
-El preporcesado es el primer contacto con los datos, las primeras tareas de limpieza y formateo de los datos suelen ser por lo general sencillas y en su mayoría genéricas. 
+El preprocesado es el primer contacto con los datos, las primeras tareas de limpieza y formateo de los datos suelen ser por lo general sencillas y en su mayoría genéricas. 
 
 Primero exponemos las funciones básicas para este propósito:
 ```{r}
