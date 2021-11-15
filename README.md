@@ -1,39 +1,3 @@
----
-title: "Trabajo Plagio Master"
-author: "Ángel Guevara Ros, Arturo Sirvent Fresneda , Miguel Hortelano Busto ,
-<br /> Francisco Olayo González Rodríguez"
-date:  "`r Sys.Date()`" 
-output:
-  html_document:
-    echo: yes
-    number_sections: yes
-    theme: lumen
-    toc: yes
-  html_notebook:
-    echo: yes
-    number_sections: yes
-    toc: yes
-  pdf_document:
-    toc: yes
-    toc_depth: 3
-    number_sections: yes
-language:
-  label:
-    fig: 'Figura '
-    tab: 'Tabla '
-    eq: 'Ecuación '
-    thm: 'Teorema '
-    lem: 'Lema '
-    def: 'Definición '
-    cor: 'Corolario '
-    prp: 'Proposición '
-    exm: 'Ejemplo '
-    exr: 'Ejercicio '
-    proof: 'Demostración. '
-    remark: 'Nota: '
-    solution: 'Solución. '
-bibliography: bibliography.bib
----
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
