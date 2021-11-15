@@ -187,17 +187,17 @@ En R, se puede hacer fácilmente usando el paquete `ngram`, y más concretamente
 Los N-gramas son muy utilizados en aplicaciones de análisis de texto, como por ejemplo en la detección de plagio. La similitud entre dos textos se puede calcular contando el número de N-gramas que tienen en común.
 
 
-## Metricas y modelos
+## Métricas y modelos
 
 Las métricas y modelos utilizados a la hora de evaluar los niveles de plagio entre textos, ya sean del mismo autor, o de varios, se deben dividir en varios grupos, dependiendo de la previa tokenización, agrupación de las palabras o letras del corpus.[@art1]
 
 ### Métricas basadas en similitudes de tokenes
 
-Una de las formas más utilizadas a la hora de comparar bloques de texto es la de comparaciones vectoriales, en las que, por ejemplo, cada palabra se convierte en el índice de un vector, y la cantidad de veces que aparece es su escalar. Utilizando este proceso, tambien se puede extrapolar de manera que en vez de contar las palabras, se cuente los pares o trios de palabras, lo que vendria a ser separacion en n-gramas(bigramas o trigramas).[@art3]
+Una de las formas más utilizadas a la hora de comparar bloques de texto es la de comparaciones vectoriales, en las que, por ejemplo, cada palabra se convierte en el índice de un vector, y la cantidad de veces que aparece es su escalar. Utilizando este proceso, también se puede extrapolar de manera que en vez de contar las palabras, se cuente los pares o trios de palabras, lo que vendría a ser separación en n-gramas(bigramas o trigramas).[@art3]
 
 Son bastante eficientes en general, y funcionan bien para textos largos a diferencia de los otros tipos de métricas.
 
-Para esta tokenización, las métricas mas utilizadas, son las de medida de distancia entre un texto y otro, comparando vector a vector.
+Para esta tokenización, las métricas más utilizadas, son las de medida de distancia entre un texto y otro, comparando vector a vector.
 
 -Una primera métrica seria la de **Jaccard**.
 
@@ -208,7 +208,7 @@ $D_{jaccard}\left ( X,Y \right )=\frac{\sum x_{i}\cap y_{i} }{\sum x_{i}\cup y_{
 En términos generales, consiste en dividir el vocabulario común de los documentos entre el vocabulario de la unión de ambos documentos, por lo que, cuanto más cerca están de 1 más parecidos son y lejanos cuando se acercan a 0.
 
 -La siguiente métrica es muy parecida ya que es la de **Jaccard pesada**.
-En esta métrica se tiene en cuenta tambien la cantidad potencial de coincidencias.
+En esta métrica se tiene en cuenta también la cantidad potencial de coincidencias.
 
 $D_{wjaccard}\left( X,Y\right )=\frac{\sum min\left ( x,y \right ) }{\sum max(x,y)}$
 
