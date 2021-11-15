@@ -188,11 +188,11 @@ Los N-gramas son muy utilizados en aplicaciones de análisis de texto, como por 
 
 ## Metricas y modelos
 
-Las métricas y modelos utilizados a la hora de evaluar los niveles de plagio entre textos, ya sean del mismo autor, o de varios, se deben dividir en varios grupos, dependiendo de la previa tokenización o agrupación de las palabras o letras del corpus.
+Las métricas y modelos utilizados a la hora de evaluar los niveles de plagio entre textos, ya sean del mismo autor, o de varios, se deben dividir en varios grupos, dependiendo de la previa tokenización, agrupación de las palabras o letras del corpus.[@art1]
 
 ### Métricas basadas en similitudes de tokenes
 
-Una de las formas más utilizadas a la hora de comparar bloques de texto es la de comparaciones vectoriales, en las que, por ejemplo, cada palabra se convierte en el índice de un vector, y la cantidad de veces que aparece es su escalar. Utilizando este proceso, tambien se puede extrapolar de manera que en vez de contar las palabras, se cuente los pares o trios de palabras, lo que vendria a ser separacion en n-gramas(bigramas o trigramas).
+Una de las formas más utilizadas a la hora de comparar bloques de texto es la de comparaciones vectoriales, en las que, por ejemplo, cada palabra se convierte en el índice de un vector, y la cantidad de veces que aparece es su escalar. Utilizando este proceso, tambien se puede extrapolar de manera que en vez de contar las palabras, se cuente los pares o trios de palabras, lo que vendria a ser separacion en n-gramas(bigramas o trigramas).[@art3]
 
 Son bastante eficientes en general, y funcionan bien para textos largos a diferencia de los otros tipos de métricas.
 
@@ -202,28 +202,28 @@ Para esta tokenización, las métricas mas utilizadas, son las de medida de dist
 
 Esta métrica trata de medir los elementos que comparten ambos vectores.
 
-$D_{jaccard}\left ( X,Y \right )=1- \frac{\sum x_{i}\cap y_{i} }{\sum x_{i}\cup y_{j}}$
+$D_{jaccard}\left ( X,Y \right )=\frac{\sum x_{i}\cap y_{i} }{\sum x_{i}\cup y_{j}}$
 
-En términos generales, consiste en dividir el vocabulario común de los documentos entre el vocabulario de la unión de ambos documentos, y le restamos 1 para que dos vectores sean parecidos cuando estan cerca de 0 y lejanos cuando se acercan a 1.
+En términos generales, consiste en dividir el vocabulario común de los documentos entre el vocabulario de la unión de ambos documentos, por lo que, cuanto más cerca están de 1 más parecidos son y lejanos cuando se acercan a 0.
 
 -La siguiente métrica es muy parecida ya que es la de **Jaccard pesada**.
 En esta métrica se tiene en cuenta tambien la cantidad potencial de coincidencias.
 
-$D_{wjaccard}\left( X,Y\right )=1- \frac{\sum min\left ( x,y \right ) }{\sum max(x,y)}$
+$D_{wjaccard}\left( X,Y\right )=\frac{\sum min\left ( x,y \right ) }{\sum max(x,y)}$
 
 -Métrica de **Sorensen**.
 
-$D_{sorensen}\left ( X,Y \right )=1- \frac{2*\sum x_{i}\cap y_{i} }{\sum x_{j}\cap 1+\sum y_{k}\cap 1}$
+$D_{sorensen}\left ( X,Y \right )=\frac{2*\sum x_{i}\cap y_{i} }{\sum x_{j}\cap 1+\sum y_{k}\cap 1}$
 
 Consiste en dividir la cantidad de palabras comunes multiplicadas por 2, ya que se repiten al ser comunes. Esto se divide por todas las palabras tipo de ambos documentos.
 
 -Con **Jaccard** y **Sorensen**, aparece un problema y es que si uno de los dos textos a comparar tiene un tamaño mucho mayor que otro, las distancias tienden siempre a cero, por ello **Overlap** trata de disminuir este problema al dividirlo por el vocabulario más pequeño que corresponde a uno de los documentos.
 
-$D_{overlap}\left ( X,Y \right )=1- \frac{2*\sum x_{i}\cap y_{i} }{min(\sum x_{j}\cap 1+\sum y_{k}\cap 1)}$
+$D_{overlap}\left ( X,Y \right )=\frac{2*\sum x_{i}\cap y_{i} }{min(\sum x_{j}\cap 1+\sum y_{k}\cap 1)}$
 
--La métrica *Masi* (Measuring Agreement on Set-valued Items) sigue un proceso parecido al overlap pero tiene en cuenta el mayor.
+-La métrica **Masi** (Measuring Agreement on Set-valued Items) sigue un proceso parecido al overlap pero tiene en cuenta el mayor.
 
-$D_{masi}\left ( X,Y \right )=1- \frac{2*\sum x_{i}\cap y_{i} }{max(\sum x_{j}\cap 1+\sum y_{k}\cap 1)}$
+$D_{masi}\left ( X,Y \right )=\frac{2*\sum x_{i}\cap y_{i} }{max(\sum x_{j}\cap 1+\sum y_{k}\cap 1)}$
 
 -Distancia de **containment**.
 
@@ -235,7 +235,7 @@ Podemos usar esta medida de distancia, siempre que el texto fuente sea más gran
 
 ### Métricas basadas en similitudes de edición
 
-Estas métricas en general se basan en comparar palabras mediante el número de trasnformaciones que hay que realizar para llegar de una a otra.
+Estas métricas en general se basan en comparar palabras mediante el número de trasnformaciones que hay que realizar para llegar de una a otra.[@art4]
 Se suelen utilizar para comparar distancias linguisticas entre diferentes idiomas, duplicación de textos y correción de léxico. Las más utlizadas son:
 
 -Distancia de **Hamming**.
@@ -254,10 +254,10 @@ Esta distancia en general es más completa y compleja que la distancia de Hammin
 
 ### Métricas basadas en las secuencias de palabras
 
-Compara las diferencias entre dos palabras, teniendo en cuenta las sub-palabras o sub-cadenas de palabras más largas dentro de las palabras iniciales. (Longest common subsequence and longest common substring)
+Compara las diferencias entre dos palabras, teniendo en cuenta las sub-palabras o sub-cadenas de palabras más largas dentro de las palabras iniciales. (Longest common subsequence and longest common substring).
 
 La diferencia básica entre las sub-palabras y las sub-cadenas de palabras, reside en que el primero utiliza letras dentro de la palabra sin necesidad de que sean contiguas, y el segundo si implica que esté una contigua a la otra.
-Por ejemplo entre las palabras 'palabras' y 'paralelas', con el método de sub-palabras tendrían en común : 'palas', mientras que con el método de sub-cadenas sería: 'pala' y 'para'.
+Por ejemplo entre las palabras 'palabras' y 'paralelas', con el método de sub-palabras tendrían en común : 'palas', mientras que con el método de sub-cadenas sería: 'pala' y 'para'.[@art2]
 
 
 # Casos práticos
