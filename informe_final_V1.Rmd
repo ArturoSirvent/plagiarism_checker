@@ -63,7 +63,7 @@ search()
 
 En los últimos años, el plagio y su detección se han posicionado como un problema en crecimiento dentro del ámbito académico. Según la Real Academia Española (RAE), plagiar es la acción de copiar en lo sustancial obras ajenas dándolas como propias. En el caso de textos, plagiar es la acción de atribuirse la autoría de fragmentos o ideas cuya propiedad intelectual no le corresponde al autor [@intro]. 
 
-Debido al aumento de este problema, han surgido diferentes soluciones por parte del mundo empresarial y del educativo. Entre otras, el desarrollo de sistemas para ayudar a los educadores en la ardua tarea de identificar trabajos plagiados, o incluso el desarrollo de sistemas que son capaces de detectar el plagio automáticamente.
+Debido al aumento de interés en la detección de plagio, han surgido diferentes soluciones por parte del mundo empresarial y del educativo. Entre otras, el desarrollo de sistemas para ayudar a los educadores en la ardua tarea de identificar trabajos plagiados, o incluso el desarrollo de sistemas que son capaces de detectar el plagio automáticamente.
 
 Uno de los problemas de estos sistemas de detección de plagio es la falta de datos para entrenar los modelos ya que no hay muchos repositorios con textos que estén admitidos como plagiados. Esto se debe a la ilegalidad de publicar textos plagiados. Por eso, en este trabajo usaremos un corpus de texto plagiado que ha sido simulado por los investigadores y que está disponible para uso libre. 
 
@@ -167,7 +167,7 @@ texto3
 
 ## Tokenizado
 
-Una vez importado el corpus y depurado los datos, el siguiente paso es tokenizarlos. Esto consiste en separar en elementos más pequeños el conjunto de datos que tenemos. Hablando de datos de tipo texo, tokenizar podría ser separar en palabras o en frases por ejemplo. La función `strsplit()` nos permitiría hacer dichas acciones variando el argumento de separación, `split`,  según nos convenga.
+Una vez importado el corpus y depurado los datos, el siguiente paso es tokenizarlos. Esto consiste en separar en elementos más pequeños el conjunto de datos que tenemos. Hablando de datos de tipo texto, tokenizar podría ser separar en palabras o en frases por ejemplo. La función `strsplit()` nos permitiría hacer dichas acciones variando el argumento de separación, `split`,  según nos convenga.
 
   - `split=" "` un espacio podría servir para separar en palabras. 
   - `split="."` un punto podría servir para separar en frases. 
