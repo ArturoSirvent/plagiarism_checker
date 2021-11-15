@@ -515,8 +515,6 @@ agrupa <-function(text){
   }
   temp2 <- gsub('[[:punct:] ]+',' ',temp2)%>%
     tolower()
-  #%>%
-  #  strsplit(split="\\s")
   
   temp <- tibble(word = unlist(temp2))%>%
     unnest_tokens(trigram, word,token = "ngrams",n=3)#cambiar el número para tamaño del ngrama
