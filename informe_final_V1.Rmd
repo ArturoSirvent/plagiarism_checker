@@ -260,9 +260,216 @@ La diferencia básica entre las sub-palabras y las sub-cadenas de palabras, resi
 Por ejemplo entre las palabras 'palabras' y 'paralelas', con el método de sub-palabras tendrían en común : 'palas', mientras que con el método de sub-cadenas sería: 'pala' y 'para'.
 
 
-# Caso prático
+# Casos práticos
 
-En este apartado, vamos a aplicar los procedimientos descritos a lo largo del trabajo a un caso real de detección de plagio, descrito en el apartado del Corpus.  
+En este apartado, vamos a aplicar los procedimientos descritos a lo largo del trabajo a un caso real de detección de plagio, descrito en el apartado del Corpus. En primer lugar veremos un caso de similitud semántica, y después veremos otro caso en el que se hace un tokenizado por N-gramas. 
+
+
+
+## Caso práctico 1 (similitud semántica):
+
+Identificación de plagio mediante una sencilla comparación semántica.  
+La estrategia para esta técnica será la tokenización del texto en sus raíces semánticas, para luego realizar una comparación con las raíces semánticas del texto original.  
+
+```{r,include=FALSE,echo=FALSE}
+#library(tidyr)
+#library(tidytext)
+#library(knitr)
+#library(dplyr)
+#library(tm)
+#library(stringr)
+#library(readr)
+```
+
+```{r,include=FALSE}
+#cargamos los datos
+#??lo comento porque asumo que se carga corpus antes
+#load(file = "corpus_as_dataframe.Rda")
+
+```
+
+```{r,include=FALSE}
+#Creamos una función que deje el texto completamente limpio:
+limpiar<-function(texto){
+  aux_texto<-paste(unlist(texto),collapse=" ")
+  aux_texto<-tolower(aux_texto) 
+  aux_texto<-gsub("([[:punct:]])|(\\n)|(\\t)|(\\W)"," ",aux_texto)
+  #quitamos basicamente todo lo que no son letras y numeros
+  aux_texto<-str_squish(aux_texto)
+  aux_texto<-stringi::stri_trans_general(aux_texto,"Latin-ASCII") 
+  return(aux_texto)
+}
+
+#creamos una nueva columna para guardar los textos limpios
+corpus$Text_clean<-sapply(corpus$Text,limpiar)
+#Ahora tenemos que eliminar las stop-words:
+
+eliminar_stopwords<-function(texto,lang="en"){
+  #libreria tm
+  texto_aux<-removeWords(texto,stopwords(lang))
+  return(str_squish(texto_aux))
+}
+
+#sobre escribimos en la columna de texto limpio, el texto sin stop-words
+corpus$Text_clean<-unname(sapply(corpus$Text_clean,eliminar_stopwords))
+#se estaba creando un vector con nombres y no necesitamos eso, 
+#por ello applicamos el unname()
+
+
+#Ahora que tenemos el texto sin stop-words le vamos a aplicar el stemming para quedarnos con los morfemas:  
+steeming<-function(texto,lang="en",sep=" "){
+  #libreria tm
+  #necesita las palabras separadas individualmente
+  texto_aux<-unlist(strsplit(texto,sep))
+  texto_aux<-stemDocument(texto_aux,language = lang)
+  return(as.character(unlist(texto_aux)))
+}
+
+#applicamos el stemming a cada texto limpio y obtenemos un vector de morfemas
+corpus$Text_clean<-unname(sapply(corpus$Text_clean,steeming))
+
+
+
+# Ya tenemos todas las palabras en sus raíces. El siguiente paso será contar todas las coincidencias. 
+# 
+# 
+# _Nota: Un problema con el que nos podríamos encontrar y que requeriría un estudio más profundo, es el tratar con los errores de ortografía. De esta manera, un plagio parcial podría pasar desapercibido por errores de escritura. La sencilla solución que proponemos es usar la función `tm_map()` de la librería `tm` para realizar una sustitución de errores comunes (usando `replaceSynonyms`)._
+# 
+# Tal como hemos mencionado quedaría realizar una comprobación de las coincidencias que encontramos entre los textos con supuesto plagio y los originales.  
+# 
+# Hacemos una función para comparar dos vectores de palabras. Esto será usado para comparar el texto supuestamente plagiado con el original.
+
+comparar<- function(original,plagio){
+  #devolvemos las palabras que son coincidencias entre ambas listas 
+  aux_plagio<-unlist(plagio)
+  aux_original<-unlist(original)
+  result<-unname(aux_plagio[aux_plagio %in% aux_original ])
+  if (length(result)==0){
+    return(0)
+  }else{
+    return(result)
+  }
+}
+
+
+# Ahora que ya tenemos la función que nos hace la comparación solo debemos de crear una columna  
+#en el dataset con las coincidencias que encontremos con el original:
+  
+#Hacemos un loop que recorra todos los registros que no son "original" y según su tipo de
+#task realizamos la comparación con el original de dicha task
+data_no_original<-corpus[corpus$Category!="original",]
+#creamos un columna para ir llenando con las coincidencias
+data_no_original$coincidencias<-NA
+
+for (i in 1:nrow(data_no_original)){
+  aux_task<-as.character(data_no_original$Task[i])
+  text_origin_aux<-as.character(unlist(corpus[(corpus$Category=="original") 
+                                              & (corpus$Task==aux_task),"Text_clean"]))
+  text_plagio_aux<-data_no_original$Text_clean[[i]]
+  aux_coincidencias<-comparar(text_origin_aux,text_plagio_aux)
+  data_no_original$coincidencias[i]<-list(aux_coincidencias)
+  
+}
+
+#hacemos la cuenta de las coincidencias al final
+data_no_original$coincidencias_count<-sapply(data_no_original$coincidencias,length)
+  
+# Una vez tenemos las coincidencias, usaremos alguna de las métricas que ya hemos usado 
+# para hacer una estimación de un porcentaje de plagio.
+#añadimos una nueva columna para hacer la cuenta del total de elementos en text_clean
+data_no_original$total_words<-sapply(data_no_original$Text_clean,length)
+
+#Y por ultimo hacemos un porcentaje de coincidencias/total *100
+data_no_original$porcentaje<-0
+for (i in 1:nrow(data_no_original)){
+  data_no_original$porcentaje[i]<-100*(data_no_original$coincidencias_count[i]/
+                                         data_no_original$total_words[i])
+}
+```
+
+El proceso seguido ha sido:   
+Pre-procesado del texto para dejarlo limpio, eliminación de las stop-words, y tokenizado según sus raíces. Finalmente realizamos una sencilla comparación elemento a elemento entre el texto original y el que se está analizando. De esta comparación obtedremos una lista con las raices coincidentes. Por último, para realizar un análisis de los resultados, se obtuvieron porcentajes para cada texto, dividiendo las raices comunes entre todas las palabras del texto a analizar.  
+
+Una vez tenemos el porcentaje de palabras plagiadas para cada texto, podemos establecer un umbral para clasificarlo como **plagio** y así determinar la precisión. En nuestro caso escogimos un umbral de **50%**, pero esto es un parámetro que se puede _tunear_ para obtener el mejor rendimiento del modelo.
+
+```{r,include=FALSE}
+#Matrix de confusion mal
+
+# Resultados
+#Veamos solo la columna de categoria, dificultad, task y porcentaje juntas:
+
+head(data_no_original[,c("Category","porcentaje","Task","Difficulty")],10)
+# El modelo es muy sencillo pero ha dado resultados bastante prometedores al menos en la clasificación NOPLAGIO--PLAGIO.
+# Si ponemos 50 como limite, vemos la cantidad de plagios que se nos han colado:
+
+#Vamos a hacer una matriz de confusión para tener una idea de que
+#tan bien funciona el modelo.
+
+#true true
+#plagio as plagio
+TT<-sum(data_no_original$porcentaje>50 & data_no_original$Category!="non")/sum(data_no_original$porcentaje>50)*100
+
+#true false
+#plagio as no-plagio
+TF<-sum(data_no_original$porcentaje>50 & data_no_original$Category=="non")/sum(data_no_original$porcentaje>50)*100
+
+#false true
+#no-plagio as plagio
+FT<-sum(data_no_original$porcentaje<50 & data_no_original$Category!="non")/sum(data_no_original$porcentaje<50)*100
+
+#false false
+#no-plagio as no-plagio
+FF<-sum(data_no_original$porcentaje<50 & data_no_original$Category=="non")/sum(data_no_original$porcentaje<50)*100
+
+table_aux<-data.frame(matrix(c(TT,FT,TF,FF),ncol=2))
+colnames(table_aux)<-c("Real Plagio"," Real No-plagio")
+rownames(table_aux)<-c("Predicted Plagio","Predicted No-plagio")
+
+kable(table_aux,"pipe")
+
+
+```
+
+
+A continuación mostramos una matriz de confusión con los resultados obtenidos:
+
+```{r,echo=FALSE}
+#library("caret")
+
+#le damos las categorias de no plagio y plagio en funcion de si es non o el resto
+
+data_no_original$Prediccion<-NA
+for (i in 1:dim(data_no_original)[1]){
+  if (data_no_original$porcentaje[i]<50){
+    data_no_original$Prediccion[i] <- "NO PLAGIO"
+  }else{
+    data_no_original$Prediccion[i] <- "PLAGIO"
+  }
+}
+data_no_original$Realidad<-NA
+for (i in 1:dim(data_no_original)[1]){
+  if(data_no_original$Category[i]=="non"){
+    data_no_original$Realidad[i] <- "NO PLAGIO"
+  }else{
+    data_no_original$Realidad[i] <- "PLAGIO"
+  }
+}
+data_no_original$Realidad <- factor(data_no_original$Realidad)
+data_no_original$Prediccion <- factor(data_no_original$Prediccion)
+confusionMatrix(data_no_original$Realidad,data_no_original$Prediccion)
+```
+
+De la matriz anterior sacamos las siguientes observaciones:
+
+* Se ha confundido un 7.6% de no plagiados como sí plagiados.
+* El 63 % de los no plagio están bien clasificados.
+* El 96 % de los plagios si se clasifican.
+* Solo un 20% se los que no debería clasificarse como plagio se clasifican como plagio.
+
+
+
+
+## Caso práctico 2
 
 Para el análsis, nosotros lo que tendremos será un data frame con 100 muestras, de las cuales las 95 primeras muestras son la respuesta a una de las preguntas por parte de los alumnos, y las 5 últimas muestras son los enlaces a Wikipedia que podían consultar para responder a cada una de las 5 preguntas. Algunas de las columnas de ese data frame serán: el tipo de plagio con el que se pedía responder, la pregunta que se responde, el individuo que la responde y la respuesta en forma de cadena de texto.
 
@@ -587,206 +794,6 @@ Observamos que tiene un accuracy del 71%, es decir, acierta el 71% de las veces.
 
 Tambén podemos visualizar la similitud de los textos gráficamente con esta métrica. En la siguiente figura cada casilla es un ngrama, dispuesto de la manera en que estaría en un texto escrito, y el color representa la similitud encontrada de este ngrama en el texto original. Se aprecian las diferencias entre un texto con fragmentos copiados y pegados (izquierda), y otro sin plagio (derecha).
 ![image](convssin.jpg)
-
-# Caso práctico (similitud semántica):
-
-Identificación de plagio mediante una sencilla comparación semántica.  
-La estrategia para esta técnica será la tokenización del texto en sus raíces semánticas, para luego realizar una comparación con las raíces semánticas del texto original.  
-
-```{r,include=FALSE,echo=FALSE}
-#library(tidyr)
-#library(tidytext)
-#library(knitr)
-#library(dplyr)
-#library(tm)
-#library(stringr)
-#library(readr)
-```
-
-```{r,include=FALSE}
-#cargamos los datos
-#??lo comento porque asumo que se carga corpus antes
-#load(file = "corpus_as_dataframe.Rda")
-
-```
-
-```{r,include=FALSE}
-#Creamos una función que deje el texto completamente limpio:
-limpiar<-function(texto){
-  aux_texto<-paste(unlist(texto),collapse=" ")
-  aux_texto<-tolower(aux_texto) 
-  aux_texto<-gsub("([[:punct:]])|(\\n)|(\\t)|(\\W)"," ",aux_texto)
-  #quitamos basicamente todo lo que no son letras y numeros
-  aux_texto<-str_squish(aux_texto)
-  aux_texto<-stringi::stri_trans_general(aux_texto,"Latin-ASCII") 
-  return(aux_texto)
-}
-
-#creamos una nueva columna para guardar los textos limpios
-corpus$Text_clean<-sapply(corpus$Text,limpiar)
-#Ahora tenemos que eliminar las stop-words:
-
-eliminar_stopwords<-function(texto,lang="en"){
-  #libreria tm
-  texto_aux<-removeWords(texto,stopwords(lang))
-  return(str_squish(texto_aux))
-}
-
-#sobre escribimos en la columna de texto limpio, el texto sin stop-words
-corpus$Text_clean<-unname(sapply(corpus$Text_clean,eliminar_stopwords))
-#se estaba creando un vector con nombres y no necesitamos eso, 
-#por ello applicamos el unname()
-
-
-#Ahora que tenemos el texto sin stop-words le vamos a aplicar el stemming para quedarnos con los morfemas:  
-steeming<-function(texto,lang="en",sep=" "){
-  #libreria tm
-  #necesita las palabras separadas individualmente
-  texto_aux<-unlist(strsplit(texto,sep))
-  texto_aux<-stemDocument(texto_aux,language = lang)
-  return(as.character(unlist(texto_aux)))
-}
-
-#applicamos el stemming a cada texto limpio y obtenemos un vector de morfemas
-corpus$Text_clean<-unname(sapply(corpus$Text_clean,steeming))
-
-
-
-# Ya tenemos todas las palabras en sus raíces. El siguiente paso será contar todas las coincidencias. 
-# 
-# 
-# _Nota: Un problema con el que nos podríamos encontrar y que requeriría un estudio más profundo, es el tratar con los errores de ortografía. De esta manera, un plagio parcial podría pasar desapercibido por errores de escritura. La sencilla solución que proponemos es usar la función `tm_map()` de la librería `tm` para realizar una sustitución de errores comunes (usando `replaceSynonyms`)._
-# 
-# Tal como hemos mencionado quedaría realizar una comprobación de las coincidencias que encontramos entre los textos con supuesto plagio y los originales.  
-# 
-# Hacemos una función para comparar dos vectores de palabras. Esto será usado para comparar el texto supuestamente plagiado con el original.
-
-comparar<- function(original,plagio){
-  #devolvemos las palabras que son coincidencias entre ambas listas 
-  aux_plagio<-unlist(plagio)
-  aux_original<-unlist(original)
-  result<-unname(aux_plagio[aux_plagio %in% aux_original ])
-  if (length(result)==0){
-    return(0)
-  }else{
-    return(result)
-  }
-}
-
-
-# Ahora que ya tenemos la función que nos hace la comparación solo debemos de crear una columna  
-#en el dataset con las coincidencias que encontremos con el original:
-  
-#Hacemos un loop que recorra todos los registros que no son "original" y según su tipo de
-#task realizamos la comparación con el original de dicha task
-data_no_original<-corpus[corpus$Category!="original",]
-#creamos un columna para ir llenando con las coincidencias
-data_no_original$coincidencias<-NA
-
-for (i in 1:nrow(data_no_original)){
-  aux_task<-as.character(data_no_original$Task[i])
-  text_origin_aux<-as.character(unlist(corpus[(corpus$Category=="original") 
-                                              & (corpus$Task==aux_task),"Text_clean"]))
-  text_plagio_aux<-data_no_original$Text_clean[[i]]
-  aux_coincidencias<-comparar(text_origin_aux,text_plagio_aux)
-  data_no_original$coincidencias[i]<-list(aux_coincidencias)
-  
-}
-
-#hacemos la cuenta de las coincidencias al final
-data_no_original$coincidencias_count<-sapply(data_no_original$coincidencias,length)
-  
-# Una vez tenemos las coincidencias, usaremos alguna de las métricas que ya hemos usado 
-# para hacer una estimación de un porcentaje de plagio.
-#añadimos una nueva columna para hacer la cuenta del total de elementos en text_clean
-data_no_original$total_words<-sapply(data_no_original$Text_clean,length)
-
-#Y por ultimo hacemos un porcentaje de coincidencias/total *100
-data_no_original$porcentaje<-0
-for (i in 1:nrow(data_no_original)){
-  data_no_original$porcentaje[i]<-100*(data_no_original$coincidencias_count[i]/
-                                         data_no_original$total_words[i])
-}
-```
-
-El proceso seguido ha sido:   
-Pre-procesado del texto para dejarlo limpio, eliminación de las stop-words, y tokenizado según sus raíces. Finalmente realizamos una sencilla comparación elemento a elemento entre el texto original y el que se está analizando. De esta comparación obtedremos una lista con las raices coincidentes. Por último, para realizar un análisis de los resultados, se obtuvieron porcentajes para cada texto, dividiendo las raices comunes entre todas las palabras del texto a analizar.  
-
-Una vez tenemos el porcentaje de palabras plagiadas para cada texto, podemos establecer un umbral para clasificarlo como **plagio** y así determinar la precisión. En nuestro caso escogimos un umbral de **50%**, pero esto es un parámetro que se puede _tunear_ para obtener el mejor rendimiento del modelo.
-
-```{r,include=FALSE}
-#Matrix de confusion mal
-
-# Resultados
-#Veamos solo la columna de categoria, dificultad, task y porcentaje juntas:
-
-head(data_no_original[,c("Category","porcentaje","Task","Difficulty")],10)
-# El modelo es muy sencillo pero ha dado resultados bastante prometedores al menos en la clasificación NOPLAGIO--PLAGIO.
-# Si ponemos 50 como limite, vemos la cantidad de plagios que se nos han colado:
-
-#Vamos a hacer una matriz de confusión para tener una idea de que
-#tan bien funciona el modelo.
-
-#true true
-#plagio as plagio
-TT<-sum(data_no_original$porcentaje>50 & data_no_original$Category!="non")/sum(data_no_original$porcentaje>50)*100
-
-#true false
-#plagio as no-plagio
-TF<-sum(data_no_original$porcentaje>50 & data_no_original$Category=="non")/sum(data_no_original$porcentaje>50)*100
-
-#false true
-#no-plagio as plagio
-FT<-sum(data_no_original$porcentaje<50 & data_no_original$Category!="non")/sum(data_no_original$porcentaje<50)*100
-
-#false false
-#no-plagio as no-plagio
-FF<-sum(data_no_original$porcentaje<50 & data_no_original$Category=="non")/sum(data_no_original$porcentaje<50)*100
-
-table_aux<-data.frame(matrix(c(TT,FT,TF,FF),ncol=2))
-colnames(table_aux)<-c("Real Plagio"," Real No-plagio")
-rownames(table_aux)<-c("Predicted Plagio","Predicted No-plagio")
-
-kable(table_aux,"pipe")
-
-
-```
-
-
-A continuación mostramos una matriz de confusión con los resultados obtenidos:
-
-```{r,echo=FALSE}
-#library("caret")
-
-#le damos las categorias de no plagio y plagio en funcion de si es non o el resto
-
-data_no_original$Prediccion<-NA
-for (i in 1:dim(data_no_original)[1]){
-  if (data_no_original$porcentaje[i]<50){
-    data_no_original$Prediccion[i] <- "NO PLAGIO"
-  }else{
-    data_no_original$Prediccion[i] <- "PLAGIO"
-  }
-}
-data_no_original$Realidad<-NA
-for (i in 1:dim(data_no_original)[1]){
-  if(data_no_original$Category[i]=="non"){
-    data_no_original$Realidad[i] <- "NO PLAGIO"
-  }else{
-    data_no_original$Realidad[i] <- "PLAGIO"
-  }
-}
-data_no_original$Realidad <- factor(data_no_original$Realidad)
-data_no_original$Prediccion <- factor(data_no_original$Prediccion)
-confusionMatrix(data_no_original$Realidad,data_no_original$Prediccion)
-```
-
-De la matriz anterior sacamos las siguientes observaciones:
-
-* Se ha confundido un 7.6% de no plagiados como sí plagiados.
-* El 63 % de los no plagio están bien clasificados.
-* El 96 % de los plagios si se clasifican.
-* Solo un 20% se los que no debería clasificarse como plagio se clasifican como plagio.
 
 
 
