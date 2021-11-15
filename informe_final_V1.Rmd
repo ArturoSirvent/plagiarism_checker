@@ -458,7 +458,7 @@ for (i in 1:dim(data_no_original)[1]){
 }
 data_no_original$Realidad <- factor(data_no_original$Realidad)
 data_no_original$Prediccion <- factor(data_no_original$Prediccion)
-confusionMatrix(data_no_original$Realidad,data_no_original$Prediccion)
+confusionMatrix(data_no_original$Prediccion,data_no_original$Realidad)
 ```
 
 De la matriz anterior sacamos las siguientes observaciones:
