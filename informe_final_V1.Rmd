@@ -580,7 +580,7 @@ T_abcde$Prediccion <- factor(T_abcde$Prediccion)
 ```
 
 ```{r}
-confusionMatrix(T_abcde$Realidad,T_abcde$Prediccion)
+confusionMatrix(T_abcde$Prediccion,T_abcde$Realidad)
 ```
 
 Observamos que tiene un accuracy del 71%, es decir, acierta el 71% de las veces. Es una medida bastante aceptable, por lo que podemos concluir que nuestro pequeño modelo nos sirve para detectar plagio con cierta fiabilidad en respuestas cortas escritas por alumnos.
