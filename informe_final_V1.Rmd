@@ -93,7 +93,7 @@ La clasificación menos relevante para nuestro trabajo sería la que atiende a l
 
 ![Clasificación del pragio según la intención del escritor](diagrama_plagio_intencion.png)
 
-Una de las clasificaciones que se hacen más comúnmente sobre el plagio, son las de plagio intrínseco y el plagio extrínseco.
+Una de las clasificaciones que se hacen más comúnmente sobre el plagio, son las de plagio intrínseco y el plagio extrínseco.  
 
 * Plagio intrínseco: Se habla de plagio intrínseco cuando en un mismo documento o texto, cambia el estilo de redacción y se distinguen diferentes autores. Su nombre viene del hecho que no se requieren de bases de datos ni fuentes externas para la comparación. Como consecuencia de dicho método, solo podremos sacar una sospecha del plagio, pues no contaremos con la fuente del plagio.
 
