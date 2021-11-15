@@ -225,7 +225,7 @@ $D_{overlap}\left ( X,Y \right )=1- \frac{2*\sum x_{i}\cap y_{i} }{min(\sum x_{j
 
 $D_{masi}\left ( X,Y \right )=1- \frac{2*\sum x_{i}\cap y_{i} }{max(\sum x_{j}\cap 1+\sum y_{k}\cap 1)}$
 
--Distancia de **contención**.
+-Distancia de **containment**.
 
 Se basa en realizar un conteo de la cantidad de de n-gramas unicos que hay en A y en B y se divide entre el número de n-gramas unicos que hay en A.
 
