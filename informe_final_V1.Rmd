@@ -135,7 +135,7 @@ texto<-gsub("\\s+"," ",str_trim(texto))
 texto
 ```
 
-En el caso de que el idioma tenga acentuación, sería recomendable eliminarla para no tener problemas de formato ni considerar diferentes palabras iguales solo por estar acentuada o no. Esto lo podemos hacer de forma sencilla usando stringi::stri_trans_general()
+En el caso de que el idioma tenga acentuación, sería recomendable eliminarla para no tener problemas de formato ni considerar diferentes palabras iguales solo por estar acentuada o no. Esto lo podemos hacer de forma sencilla usando `stringi::stri_trans_general()`.
 ```{r}
 
 texto<-stringi::stri_trans_general(texto,"Latin-ASCII") 
